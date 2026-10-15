@@ -35,6 +35,40 @@ check('hybrid author-only weight → all same author', w.body.runs[0].results.ev
 check('unknown algo → 400', (await get('/recommend/0439136350?algo=bogus')).status === 400);
 check('unknown isbn → 404', (await get('/recommend/nope')).status === 404);
 
+// ---- accounts & personalised recommendations ----
+const send = async (method, p, body, token) => {
+  const r = await fetch(BASE + p, { method, headers: { 'Content-Type': 'application/json', ...(token ? { Authorization: `Bearer ${token}` } : {}) }, body: body ? JSON.stringify(body) : undefined });
+  return { status: r.status, body: await r.json() };
+};
+const uname = `smoke_${Date.now()}`;
+const su = await send('POST', '/auth/signup', { username: uname, password: 'secret123' });
+check('signup → 201 + token', su.status === 201 && !!su.body.token && su.body.user.onboarded === false);
+check('duplicate signup → 409', (await send('POST', '/auth/signup', { username: uname, password: 'secret123' })).status === 409);
+check('bad password login → 401', (await send('POST', '/auth/login', { username: uname, password: 'nope' })).status === 401);
+const li = await send('POST', '/auth/login', { username: uname, password: 'secret123' });
+const T = li.body.token;
+check('login → token', li.status === 200 && !!T);
+check('/me without token → 401', (await get('/me')).status === 401);
+check('popular books for onboarding', (await get('/books/popular')).body.length >= 20);
+check('favorites < 3 → 400', (await send('PUT', '/me/favorites', { isbns: ['0345339681'] }, T)).status === 400);
+const favs = ['0345339681', '0441172660', '0671461494'];
+const fv = await send('PUT', '/me/favorites', { isbns: favs }, T);
+check('set 3 favorites → onboarded', fv.status === 200 && fv.body.user.onboarded === true);
+const fy = await send('GET', '/me/recommend?algo=all&limit=10', null, T);
+check('for-you runs all 5 algorithms', fy.status === 200 && fy.body.runs.length === 5);
+for (const run of fy.body.runs || []) {
+  const noFav = run.results.every((x) => !favs.includes(x.book.isbn));
+  const contribOk = run.results.every((x) => Object.keys(x.contributions).every((i) => favs.includes(i)) && x.matchedSeeds >= 1);
+  const seedsUsed = new Set(run.results.map((x) => x.bestSeed)).size;
+  check(`  ${run.algorithm}: favourites excluded, contributions valid`, run.results.length > 0 && noFav && contribOk, `${run.results.length} results, ${seedsUsed} favourites represented, ${run.meta.ms}ms`);
+}
+const target = fy.body.runs[0].results[0].book.isbn;
+await send('POST', `/me/want/${target}`, null, T);
+const fy2 = await send('GET', '/me/recommend?algo=tfidf&limit=10', null, T);
+check('want-to-read book excluded from For You', fy2.body.runs[0].results.every((x) => x.book.isbn !== target));
+const me = await send('GET', '/me', null, T);
+check('/me returns shelves', me.body.favorites.length === 3 && me.body.wantToRead.length === 1);
+
 console.log(failed ? `\n${failed} check(s) failed` : '\nAll checks passed');
 process.exit(failed ? 1 : 0);
 

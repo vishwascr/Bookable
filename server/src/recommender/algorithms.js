@@ -139,3 +139,86 @@ export function publicBook(b) {
   const { aKey, pKey, dKey, ...rest } = b;
   return rest;
 }
+
+// ---------------------------------------------------------------------------
+// Profile (multi-seed) recommendations — used by the "For You" page.
+// Runs the chosen algorithm once per favourite book, then aggregates:
+//   profileScore(c) = (1/|S|) · Σ_s score_s(c)
+// so books recommended by several favourites rank higher. For each result we
+// keep the per-seed contributions ("Because you liked …").
+// ---------------------------------------------------------------------------
+export function recommendProfile(algoKey, seeds, { limit = 12, weights = DEFAULT_WEIGHTS, exclude = [] } = {}) {
+  const algo = ALGORITHMS[algoKey];
+  if (!algo) throw new Error(`Unknown algorithm "${algoKey}"`);
+  const { books } = engine();
+  const t0 = performance.now();
+
+  const seedKeys = new Set(seeds.map((s) => books[s].dKey));
+  const excludeKeys = new Set(exclude.map((i) => books[i]?.dKey).filter(Boolean));
+  const agg = new Map(); // dKey -> { c, total, contrib: {seedIsbn: score}, best: {score, f, seed} }
+  let candidatesConsidered = 0;
+
+  for (const seed of seeds) {
+    const cands = algo.candidates(seed);
+    candidatesConsidered += cands.length;
+    const bestPerWork = new Map(); // per seed: dKey -> {c, f, score}
+    for (const c of cands) {
+      const k = books[c].dKey;
+      if (seedKeys.has(k) || excludeKeys.has(k)) continue;
+      const f = features(seed, c);
+      const score = algo.score(f, weights);
+      if (score <= 0) continue;
+      const prev = bestPerWork.get(k);
+      if (!prev || score > prev.score) bestPerWork.set(k, { c, f, score });
+    }
+    const seedIsbn = books[seed].isbn;
+    for (const [k, v] of bestPerWork) {
+      let a = agg.get(k);
+      if (!a) { a = { c: v.c, total: 0, contrib: {}, best: null }; agg.set(k, a); }
+      a.total += v.score;
+      a.contrib[seedIsbn] = +v.score.toFixed(4);
+      if (!a.best || v.score > a.best.score) a.best = { ...v, seed: seedIsbn };
+    }
+  }
+
+  const n = seeds.length || 1;
+  const pool = [...agg.values()]
+    .map((a) => ({ ...a, score: a.total / n }))
+    .sort((x, y) => y.score - x.score)
+    .slice(0, limit * 8);
+
+  // Greedy diversity re-rank: each time a favourite is the "main reason" for a pick,
+  // further picks driven by that same favourite are multiplied by DIVERSITY (0.85).
+  const DIVERSITY = 0.85;
+  const used = {};
+  const picked = [];
+  while (picked.length < limit && pool.length) {
+    let bi = 0, bv = -1;
+    for (let i = 0; i < pool.length; i++) {
+      const v = pool[i].score * DIVERSITY ** (used[pool[i].best.seed] || 0);
+      if (v > bv) { bv = v; bi = i; }
+    }
+    const [a] = pool.splice(bi, 1);
+    used[a.best.seed] = (used[a.best.seed] || 0) + 1;
+    picked.push(a);
+  }
+
+  const results = picked
+    .map((a) => ({
+      book: publicBook(books[a.best.c]),
+      score: +a.score.toFixed(4),
+      features: a.best.f, // features vs. the favourite that contributed most
+      bestSeed: a.best.seed,
+      contributions: a.contrib, // seedIsbn -> score from that favourite
+      matchedSeeds: Object.keys(a.contrib).length,
+    }));
+
+  return {
+    algorithm: algoKey,
+    name: algo.name,
+    formula: `profile = (1/${n}) · Σ over favourites [ ${algo.formula.replace(/^score = /, '')} ]`,
+    weights: algoKey === 'hybrid' ? weights : undefined,
+    meta: { seeds: n, candidatesConsidered, ms: +(performance.now() - t0).toFixed(1) },
+    results,
+  };
+}
