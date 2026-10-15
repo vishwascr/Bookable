@@ -6,9 +6,41 @@ Base URL: `http://localhost:5050/api` (proxied as `/api` by Vite in dev).
 |---|---|---|
 | GET | `/health` | `{ ok, ready, stats: { books, vocabulary, authors, publishers, buildMs } }` |
 | GET | `/algorithms` | List of algorithms (`key, name, short, formula, explain[]`) + `defaultWeights` |
-| GET | `/books/search?q=&limit=` | Mongo `$text` search on title/author (limit ≤ 50) |
+| GET | `/books/search?q=&page=&limit=` | Mongo `$text` search on title/author with pagination metadata |
 | GET | `/books/:isbn` | `{ book, terms }` — terms = TF-IDF weights of the title |
 | GET | `/recommend/:isbn` | Recommendations (see below) |
+
+### `GET /books/search`
+Query parameters:
+| Parameter | Default | Description |
+|---|---|---|
+| `q` | `""` | Search query string (minimum 2 characters) |
+| `page` | *(optional)* | Page number (1-indexed). When present or `paginate=true`, returns paginated envelope |
+| `limit` | 20 | Number of results per page (1–100) |
+| `paginate` | *(optional)* | Set to `'true'` to force paginated envelope |
+
+Response when `page` is provided:
+```json
+{
+  "books": [
+    {
+      "isbn": "0618134700",
+      "title": "The Annotated Hobbit: The Hobbit, Or, There and Back Again",
+      "author": "J. R. R. Tolkien",
+      "year": 2002,
+      "publisher": "Houghton Mifflin Company",
+      "imageS": "http://...",
+      "imageM": "http://...",
+      "imageL": "http://..."
+    }
+  ],
+  "total": 50,
+  "page": 1,
+  "totalPages": 3,
+  "limit": 20
+}
+```
+*(When `page` is omitted, returns array `[...]` directly for lightweight autocomplete requests).*
 
 ### `GET /recommend/:isbn`
 | Query | Default | Notes |

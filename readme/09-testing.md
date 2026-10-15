@@ -5,11 +5,11 @@ With MongoDB and the API running:
 ```bash
 cd server && npm run smoke
 ```
-It checks: health/index ready (271,359 books), 5 algorithms listed, search works, and for 3 seed
+It checks: health/index ready (271,359 books), 5 algorithms listed, array search format, paginated search metadata (`total`, `page`, `totalPages`), and for 3 seed
 books × 5 algorithms that scores are in [0,1] and sorted, the seed is excluded, results are unique;
 hybrid weights are honoured (author-only weight ⇒ all results share the author); error codes 400/404.
 
-Last run: **24/24 checks passed**, recommendation latency 0.2 – 9 ms.
+Last run: **25/25 checks passed**, recommendation latency 0.2 – 9 ms.
 
 ## Manual checks performed
 | Seed | Algorithm | Observation |

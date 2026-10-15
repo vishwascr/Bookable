@@ -37,3 +37,4 @@ check('unknown isbn → 404', (await get('/recommend/nope')).status === 404);
 
 console.log(failed ? `\n${failed} check(s) failed` : '\nAll checks passed');
 process.exit(failed ? 1 : 0);
+

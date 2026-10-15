@@ -8,7 +8,9 @@ const j = async (url) => {
 export const api = {
   health: () => j('/api/health'),
   algorithms: () => j('/api/algorithms'),
-  search: (q) => j(`/api/books/search?q=${encodeURIComponent(q)}&limit=12`),
+  search: (q) => j(`/api/books/search?q=${encodeURIComponent(q)}&limit=10`),
+  searchPaginated: (q, page = 1, limit = 24) =>
+    j(`/api/books/search?q=${encodeURIComponent(q)}&page=${page}&limit=${limit}`),
   recommend: (isbn, algo, weights, limit = 12) => {
     const p = new URLSearchParams({ algo, limit });
     if (weights) for (const [k, v] of Object.entries(weights)) p.set(`w_${k}`, v);

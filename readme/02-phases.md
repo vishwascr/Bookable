@@ -17,7 +17,7 @@ flowchart LR
 | **1 · Data ingestion** | Get CSV into MongoDB | `server/src/models/Book.js`, `server/src/scripts/import.js` (streaming, batched 5k, dedupes ISBNs, cleans years), text index | ✅ Done — 271,359 books |
 | **2 · Engine** | Fast in-memory recommender | `recommender/text.js` (tokeniser), `engine.js` (TF-IDF vectors, inverted index, author/publisher maps), `algorithms.js` (5 algorithms) | ✅ Done — index builds in ~8 s |
 | **3 · API** | Expose search & recommend | `routes/api.js`: `/health`, `/algorithms`, `/books/search`, `/books/:isbn`, `/recommend/:isbn` | ✅ Done |
-| **4 · UI** | Usable front-end | Vite + React: search with autocomplete, algorithm picker, result cards with covers | ✅ Done |
+| **4 · UI** | Usable front-end | Vite + React: search bar with instant autocomplete, **dedicated paginated search results page**, breadcrumbs, algorithm picker, result cards with covers | ✅ Done |
 | **5 · Explainability** | Show *how* | Seed TF-IDF term weights, per-feature bars, formula + step list, live hybrid sliders, **Compare all** grid, candidate counts & timings | ✅ Done |
 | **6 · Tuning & testing** | Better results | Collapse editions/formats/translations via "work key", HTML-entity decoding, format stop-words; smoke tests ([09-testing.md](09-testing.md)) | ✅ Done |
 | **7 · Docs** | Everything documented | This `readme/` folder | ✅ Done |
@@ -36,10 +36,13 @@ At server start the engine streams all books from MongoDB and builds in-memory s
 
 ### Phase 3 – API
 Thin Express layer; returns `503` until the index is ready so the UI can show "Building index…".
+Supports paginated text search via `/api/books/search?q=&page=&limit=`.
 
-### Phase 4/5 – UI & explainability
-Single-page app; every recommendation request returns the seed, candidate count, timing,
-formula and per-result features so the UI never has to guess.
+### Phase 4/5 – UI, search flow & explainability
+Single-page app with distinct interactive states:
+1. **Landing state**: Search bar + popular sample topic pills (Hobbit, Harry Potter, Dune, Stephen King, etc.).
+2. **Search results page**: Pressing Return or clicking "Search" renders a dedicated paginated grid of books matching the query, with cover images, authors, years, publishers, ISBNs, and a "Get Recommendations" CTA.
+3. **Recommendation view**: Selecting a book displays its seed terms, algorithm selector, live weight sliders, "How it works" math explainer, and recommendation cards with individual feature bars. Breadcrumbs let users jump back to their active search results page anytime.
 
 ### Phase 6 – Tuning
 Initial results were dominated by duplicates ("The Hobbit", "El Hobbit", "Hobbit (Audio CD)").
