@@ -1,0 +1,47 @@
+# 02 · Build Phases
+
+```mermaid
+flowchart LR
+  P0["Phase 0: Discovery & design"] --> P1["Phase 1: Data ingestion"]
+  P1 --> P2["Phase 2: Recommendation engine"]
+  P2 --> P3["Phase 3: REST API"]
+  P3 --> P4["Phase 4: React UI"]
+  P4 --> P5["Phase 5: Explainability & compare"]
+  P5 --> P6["Phase 6: Quality tuning & testing"]
+  P6 --> P7["Phase 7: Documentation"]
+```
+
+| Phase | Goal | Deliverables | Status |
+|---|---|---|---|
+| **0 · Discovery** | Understand data, agree scope | Dataset inspection (271,360 rows, 8 cols, no ratings); decisions in [01-requirements.md](01-requirements.md) | ✅ Done |
+| **1 · Data ingestion** | Get CSV into MongoDB | `server/src/models/Book.js`, `server/src/scripts/import.js` (streaming, batched 5k, dedupes ISBNs, cleans years), text index | ✅ Done — 271,359 books |
+| **2 · Engine** | Fast in-memory recommender | `recommender/text.js` (tokeniser), `engine.js` (TF-IDF vectors, inverted index, author/publisher maps), `algorithms.js` (5 algorithms) | ✅ Done — index builds in ~8 s |
+| **3 · API** | Expose search & recommend | `routes/api.js`: `/health`, `/algorithms`, `/books/search`, `/books/:isbn`, `/recommend/:isbn` | ✅ Done |
+| **4 · UI** | Usable front-end | Vite + React: search with autocomplete, algorithm picker, result cards with covers | ✅ Done |
+| **5 · Explainability** | Show *how* | Seed TF-IDF term weights, per-feature bars, formula + step list, live hybrid sliders, **Compare all** grid, candidate counts & timings | ✅ Done |
+| **6 · Tuning & testing** | Better results | Collapse editions/formats/translations via "work key", HTML-entity decoding, format stop-words; smoke tests ([09-testing.md](09-testing.md)) | ✅ Done |
+| **7 · Docs** | Everything documented | This `readme/` folder | ✅ Done |
+
+## Phase detail
+
+### Phase 1 – Data ingestion
+1. Stream the 73 MB CSV with `csv-parse` (never loads it fully into memory).
+2. Clean each row (trim; year `0` or > 2025 → `null`).
+3. Skip duplicate ISBNs / empty titles, `insertMany` in batches of 5,000.
+4. Create indexes: unique `isbn`, text index on `title`+`author`, `author`.
+
+### Phase 2 – Engine
+At server start the engine streams all books from MongoDB and builds in-memory structures
+(see [03-architecture.md](03-architecture.md)). Mongo stays the source of truth; the engine is a derived cache.
+
+### Phase 3 – API
+Thin Express layer; returns `503` until the index is ready so the UI can show "Building index…".
+
+### Phase 4/5 – UI & explainability
+Single-page app; every recommendation request returns the seed, candidate count, timing,
+formula and per-result features so the UI never has to guess.
+
+### Phase 6 – Tuning
+Initial results were dominated by duplicates ("The Hobbit", "El Hobbit", "Hobbit (Audio CD)").
+Fix: a *work key* = sorted tokens of the main title (parentheses and subtitles stripped) used to
+de-duplicate results and to exclude other editions of the seed.
