@@ -1,202 +1,250 @@
-import { useState } from 'react';
-import mascotAsset from '../assets/mascot.png';
-
-// Mascot component: Panda with reading glasses, reading an orange book, holding bamboo, sitting on a purple pastel cloud.
-// Supports custom image if provided via props/asset, with a rich standalone SVG as default/fallback.
-export default function Mascot({ src = mascotAsset, size = 'md', className = '', alt = 'Bookable Panda Mascot - Where wisdom meets technology' }) {
-  const [imgFailed, setImgFailed] = useState(false);
-
-  // If a raster image is supplied and loads successfully, render it
-  if (src && !imgFailed) {
-    return (
-      <img
-        src={src}
-        alt={alt}
-        className={`mascot-img mascot-${size} ${className}`}
-        onError={() => setImgFailed(true)}
-      />
-    );
-  }
-
-  // Crisp, scalable pastel SVG illustration
+// Mascot component: Friendly Bookable Panda logo in the style of tibbixel-dot-com-37658-svg.svg
+// - Reading glasses perched on nose
+// - Open orange book (#E88051) with blank pages (no text)
+// - Bamboo stalk & leaves in green (#145D3C)
+// - Plush seated cushion in royal blue (#0B4D91)
+// Rendered as an inline scalable SVG for sharp vector display across all resolutions.
+export default function Mascot({ size = 'md', className = '', alt = 'Bookable Panda Mascot - Where wisdom meets technology' }) {
   const dimensions = {
-    sm: { width: 90, height: 80 },
-    md: { width: 140, height: 125 },
-    lg: { width: 200, height: 180 },
-  }[size] || { width: 140, height: 125 };
+    sm: { width: 85, height: 90 },
+    md: { width: 135, height: 144 },
+    lg: { width: 190, height: 202 },
+  }[size] || { width: 135, height: 144 };
 
   return (
     <svg
       width={dimensions.width}
       height={dimensions.height}
-      viewBox="0 0 200 180"
+      viewBox="0 0 217 231"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
       className={`mascot-svg mascot-${size} ${className}`}
       role="img"
       aria-label={alt}
     >
-      <defs>
-        {/* Cloud Gradient */}
-        <linearGradient id="cloudGrad" x1="40" y1="130" x2="160" y2="175" gradientUnits="userSpaceOnUse">
-          <stop stopColor="#E2D4F8" />
-          <stop offset="1" stopColor="#C4ACED" />
-        </linearGradient>
-        {/* Soft Shadow */}
-        <filter id="softGlow" x="-10%" y="-10%" width="120%" height="120%">
-          <feDropShadow dx="0" dy="4" stdDeviation="3" floodColor="#7B5BA8" floodOpacity="0.15" />
-        </filter>
-        {/* Orange Book Gradient */}
-        <linearGradient id="bookCover" x1="45" y1="85" x2="85" y2="120" gradientUnits="userSpaceOnUse">
-          <stop stopColor="#FFB380" />
-          <stop offset="1" stopColor="#F57E42" />
-        </linearGradient>
-        {/* Bamboo Gradient */}
-        <linearGradient id="bambooGrad" x1="135" y1="65" x2="148" y2="115" gradientUnits="userSpaceOnUse">
-          <stop stopColor="#A2E3B8" />
-          <stop offset="1" stopColor="#5EBA84" />
-        </linearGradient>
-      </defs>
+      {/* === CUSHION (#0B4D91) === */}
+      <g id="cushion">
+        {/* Main plush cushion in exact #0B4D91 */}
+        <path
+          d="M 10 196 C 6 179, 44 174, 108 174 C 172 174, 210 179, 206 196 C 201 219, 172 227, 108 227 C 44 227, 15 219, 10 196 Z"
+          fill="#0B4D91"
+          stroke="#000000"
+          strokeWidth="4.5"
+          strokeLinejoin="round"
+        />
 
-      {/* Sparkles / Magic Stars */}
-      <path d="M30 115 L32 110 L34 115 L39 117 L34 119 L32 124 L30 119 L25 117 Z" fill="#FDE49B" opacity="0.9" />
-      <path d="M172 90 L174 86 L176 90 L180 91 L176 92 L174 96 L172 92 L168 91 Z" fill="#F8C1D9" opacity="0.85" />
-      <circle cx="166" cy="128" r="2.5" fill="#FFE18F" opacity="0.7" />
+        {/* Cushion Top Plush Rim Highlight */}
+        <path
+          d="M 26 193 C 56 184, 160 184, 190 193"
+          fill="none"
+          stroke="#2270C4"
+          strokeWidth="3"
+          strokeLinecap="round"
+          opacity="0.85"
+        />
 
-      {/* --- PASTEL PURPLE CLOUD --- */}
-      <g filter="url(#softGlow)">
-        {/* Bottom / background cloud puffs */}
-        <ellipse cx="65" cy="152" rx="35" ry="20" fill="url(#cloudGrad)" />
-        <ellipse cx="135" cy="152" rx="35" ry="20" fill="url(#cloudGrad)" />
-        <ellipse cx="100" cy="156" rx="48" ry="22" fill="url(#cloudGrad)" />
-        <ellipse cx="42" cy="148" rx="22" ry="16" fill="url(#cloudGrad)" />
-        <ellipse cx="158" cy="148" rx="22" ry="16" fill="url(#cloudGrad)" />
-        {/* Cloud top highlight puffs */}
-        <ellipse cx="78" cy="144" rx="26" ry="15" fill="#EDE4FB" />
-        <ellipse cx="122" cy="144" rx="26" ry="15" fill="#EDE4FB" />
-        <ellipse cx="100" cy="145" rx="32" ry="14" fill="#F5F0FD" />
+        {/* Cushion Front Creases & Tufting Button */}
+        <path
+          d="M 68 206 Q 108 213 148 206"
+          fill="none"
+          stroke="#062F5E"
+          strokeWidth="2.5"
+          strokeLinecap="round"
+        />
+        <circle cx="108" cy="211" r="3.2" fill="#062F5E" />
+        <circle cx="108" cy="210" r="1.5" fill="#2270C4" opacity="0.8" />
       </g>
 
-      {/* --- PANDA TAIL --- */}
-      <ellipse cx="66" cy="125" rx="8" ry="7" fill="#3D414A" />
+      {/* === PANDA BODY (Black Fur with Bold Contours) === */}
+      {/* Torso & Shoulders */}
+      <path
+        d="M 44 114 C 28 138, 26 166, 36 194 C 52 201, 164 201, 180 194 C 190 166, 188 138, 172 114 Z"
+        fill="#000000"
+        stroke="#000000"
+        strokeWidth="4.5"
+        strokeLinejoin="round"
+      />
 
-      {/* --- PANDA FEET (Sitting cross-legged) --- */}
-      <ellipse cx="68" cy="135" rx="14" ry="10" fill="#3D414A" />
-      <ellipse cx="68" cy="134" rx="6" ry="4" fill="#585D6A" />
-      <circle cx="63" cy="130" r="2" fill="#585D6A" />
-      <circle cx="68" cy="129" r="2" fill="#585D6A" />
-      <circle cx="73" cy="130" r="2" fill="#585D6A" />
+      {/* White Chest & Tummy showing behind/under book */}
+      <ellipse cx="108" cy="158" rx="48" ry="32" fill="#FFFFFF" stroke="#000000" strokeWidth="3.5" />
 
-      <ellipse cx="132" cy="135" rx="14" ry="10" fill="#3D414A" />
-      <ellipse cx="132" cy="134" rx="6" ry="4" fill="#585D6A" />
-      <circle cx="127" cy="130" r="2" fill="#585D6A" />
-      <circle cx="132" cy="129" r="2" fill="#585D6A" />
-      <circle cx="137" cy="130" r="2" fill="#585D6A" />
-
-      {/* --- PANDA BODY --- */}
-      <ellipse cx="100" cy="115" rx="33" ry="27" fill="#FAFAF8" />
-      {/* Charcoal belly band / shoulders */}
-      <path d="M72 105 C72 92, 128 92, 128 105 C124 116, 76 116, 72 105 Z" fill="#3D414A" />
-      {/* Soft tummy highlight */}
-      <ellipse cx="100" cy="120" rx="18" ry="14" fill="#FFFFFF" />
-
-      {/* --- PANDA EARS --- */}
-      <circle cx="73" cy="46" r="13" fill="#3D414A" />
-      <circle cx="73" cy="46" r="7" fill="#F8B8C6" opacity="0.8" />
-      <circle cx="127" cy="46" r="13" fill="#3D414A" />
-      <circle cx="127" cy="46" r="7" fill="#F8B8C6" opacity="0.8" />
-
-      {/* --- PANDA HEAD --- */}
-      <ellipse cx="100" cy="68" rx="32" ry="26" fill="#FAFAF8" />
-
-      {/* Eye Patches (Signature Panda Patches tilted inward) */}
-      <ellipse cx="86" cy="66" rx="9" ry="11" transform="rotate(-15 86 66)" fill="#3D414A" />
-      <ellipse cx="114" cy="66" rx="9" ry="11" transform="rotate(15 114 66)" fill="#3D414A" />
-
-      {/* Friendly Eyes with Catchlights */}
-      <ellipse cx="87" cy="65" rx="4" ry="5" fill="#1C1E24" />
-      <circle cx="85.5" cy="63" r="1.8" fill="#FFFFFF" />
-      <circle cx="88.5" cy="67" r="0.9" fill="#FFFFFF" />
-
-      <ellipse cx="113" cy="65" rx="4" ry="5" fill="#1C1E24" />
-      <circle cx="111.5" cy="63" r="1.8" fill="#FFFFFF" />
-      <circle cx="114.5" cy="67" r="0.9" fill="#FFFFFF" />
-
-      {/* Cute Rosy Pastel Cheeks */}
-      <ellipse cx="78" cy="74" rx="6" ry="4" fill="#F9B3C2" opacity="0.65" />
-      <ellipse cx="122" cy="74" rx="6" ry="4" fill="#F9B3C2" opacity="0.65" />
-
-      {/* Little Button Nose & Happy Mouth */}
-      <path d="M97 73 Q100 70 103 73 Q100 76 97 73 Z" fill="#3D414A" />
-      <path d="M97 76 Q100 79 100 81" stroke="#3D414A" strokeWidth="1.5" strokeLinecap="round" />
-      <path d="M96 79 Q100 82 104 79" stroke="#3D414A" strokeWidth="1.5" strokeLinecap="round" fill="none" />
-
-      {/* --- READING GLASSES (Gold / Honey Wireframe) --- */}
-      {/* Left Lens Frame */}
-      <circle cx="86" cy="66" r="10.5" stroke="#E69C3D" strokeWidth="2" fill="#EAF6FF" fillOpacity="0.25" />
-      {/* Right Lens Frame */}
-      <circle cx="114" cy="66" r="10.5" stroke="#E69C3D" strokeWidth="2" fill="#EAF6FF" fillOpacity="0.25" />
-      {/* Bridge */}
-      <path d="M96.5 65 Q100 63 103.5 65" stroke="#E69C3D" strokeWidth="2" strokeLinecap="round" fill="none" />
-      {/* Glass frame temple side lines */}
-      <path d="M75.5 65 L71 63" stroke="#E69C3D" strokeWidth="1.8" strokeLinecap="round" />
-      <path d="M124.5 65 L129 63" stroke="#E69C3D" strokeWidth="1.8" strokeLinecap="round" />
-      {/* Lens reflection gleams */}
-      <path d="M81 61 Q86 59 90 62" stroke="#FFFFFF" strokeWidth="1.2" strokeLinecap="round" opacity="0.75" />
-      <path d="M109 61 Q114 59 118 62" stroke="#FFFFFF" strokeWidth="1.2" strokeLinecap="round" opacity="0.75" />
-
-      {/* --- LEFT HAND & ORANGE BOOK --- */}
-      {/* Left Arm reaching forward */}
-      <path d="M74 95 C66 98, 62 108, 69 115 C74 120, 80 114, 82 108 Z" fill="#3D414A" />
-
-      {/* Open Orange Book */}
-      <g filter="url(#softGlow)">
-        {/* Book back/cover */}
-        <path d="M48 94 Q64 97 80 93 L80 117 Q64 121 48 116 Z" fill="url(#bookCover)" />
-        <path d="M80 93 Q96 97 112 94 L112 117 Q96 121 80 117 Z" fill="url(#bookCover)" />
-        {/* Book spine curve */}
-        <path d="M79 92 L81 92 L81 118 L79 118 Z" fill="#D95C20" />
-        {/* Open cream pages */}
-        <path d="M50 96 Q65 99 79 96 L79 115 Q65 118 50 114 Z" fill="#FFFBF5" />
-        <path d="M81 96 Q95 99 110 96 L110 114 Q95 118 81 115 Z" fill="#FFFBF5" />
-        {/* Printed text lines on pages */}
-        <line x1="55" y1="100" x2="74" y2="100" stroke="#E2C19E" strokeWidth="1.2" strokeLinecap="round" />
-        <line x1="55" y1="104" x2="72" y2="104" stroke="#E2C19E" strokeWidth="1.2" strokeLinecap="round" />
-        <line x1="55" y1="108" x2="74" y2="108" stroke="#E2C19E" strokeWidth="1.2" strokeLinecap="round" />
-        <line x1="86" y1="100" x2="105" y2="100" stroke="#E2C19E" strokeWidth="1.2" strokeLinecap="round" />
-        <line x1="86" y1="104" x2="103" y2="104" stroke="#E2C19E" strokeWidth="1.2" strokeLinecap="round" />
-        <line x1="86" y1="108" x2="105" y2="108" stroke="#E2C19E" strokeWidth="1.2" strokeLinecap="round" />
-      </g>
-      {/* Panda Paws holding book edge */}
-      <circle cx="68" cy="116" r="4.5" fill="#3D414A" />
-      <circle cx="94" cy="116" r="4.5" fill="#3D414A" />
-
-      {/* --- RIGHT HAND & BAMBOO STALK --- */}
-      {/* Bamboo Stalk held in right hand */}
-      <g>
-        {/* Segment 1 */}
-        <line x1="140" y1="62" x2="143" y2="76" stroke="url(#bambooGrad)" strokeWidth="6" strokeLinecap="round" />
-        <ellipse cx="141.5" cy="76" rx="4" ry="1.5" fill="#4B996C" />
-        {/* Segment 2 */}
-        <line x1="143" y1="78" x2="146" y2="94" stroke="url(#bambooGrad)" strokeWidth="6" strokeLinecap="round" />
-        <ellipse cx="144.5" cy="94" rx="4" ry="1.5" fill="#4B996C" />
-        {/* Segment 3 */}
-        <line x1="146" y1="96" x2="149" y2="114" stroke="url(#bambooGrad)" strokeWidth="5.5" strokeLinecap="round" />
-
-        {/* Bamboo Fresh Leaves */}
-        {/* Top leaf 1 */}
-        <path d="M140 62 Q130 55 125 58 Q132 64 140 62 Z" fill="#8CE0A7" />
-        {/* Top leaf 2 */}
-        <path d="M141 60 Q146 50 154 52 Q148 60 141 60 Z" fill="#72CE90" />
-        {/* Mid leaf */}
-        <path d="M144 76 Q156 70 162 74 Q154 80 144 76 Z" fill="#8CE0A7" />
-        {/* Lower leaf */}
-        <path d="M143 78 Q132 75 128 80 Q137 83 143 78 Z" fill="#5EBA84" />
+      {/* Left Seated Paw & White Pads */}
+      <g id="leftFoot" transform="rotate(-8 42 186)">
+        <ellipse cx="42" cy="186" rx="16" ry="12" fill="#000000" stroke="#000000" strokeWidth="3" />
+        <ellipse cx="42" cy="182" rx="7" ry="5" fill="#FFFFFF" />
+        <circle cx="36" cy="188" r="2.5" fill="#FFFFFF" />
+        <circle cx="42" cy="190" r="2.5" fill="#FFFFFF" />
+        <circle cx="48" cy="188" r="2.5" fill="#FFFFFF" />
       </g>
 
-      {/* Right Arm & Paw holding bamboo */}
-      <path d="M125 96 C134 98, 142 102, 146 108 C144 114, 137 117, 131 113 Z" fill="#3D414A" />
-      <circle cx="144" cy="106" r="5" fill="#3D414A" />
+      {/* Right Seated Paw & White Pads */}
+      <g id="rightFoot" transform="rotate(8 174 186)">
+        <ellipse cx="174" cy="186" rx="16" ry="12" fill="#000000" stroke="#000000" strokeWidth="3" />
+        <ellipse cx="174" cy="182" rx="7" ry="5" fill="#FFFFFF" />
+        <circle cx="168" cy="188" r="2.5" fill="#FFFFFF" />
+        <circle cx="174" cy="190" r="2.5" fill="#FFFFFF" />
+        <circle cx="180" cy="188" r="2.5" fill="#FFFFFF" />
+      </g>
+
+      {/* === PANDA HEAD & EARS (Exact geometry from tibbixel reference) === */}
+      <g id="head">
+        <clipPath id="headClip">
+          <path d="M 0 0 L 217 0 L 217 128 C 180 134, 140 136, 108 136 C 76 136, 36 134, 0 128 Z" />
+        </clipPath>
+        <path
+          d="M 101.865,230.774 C 74.254,230.172 50.123,226.883 33.206,221.414 C 20.208,217.213 8.726,211.522 3.38,206.63 C 2.613,205.928 1.538,204.597 0.993,203.673 L 0.0,201.993 L 0.0,198.415 C 0.0,195.033 0.04,194.75 0.751,193.25 C 2.744,189.041 8.264,185.194 17.22,181.774 C 21.139,180.277 28.397,178.036 29.326,178.036 C 29.721,178.036 29.766,177.46 29.776,172.281 C 29.786,164.857 30.448,160.907 32.968,153.115 L 33.936,150.123 L 33.617,147.212 C 32.687,138.746 36.562,128.235 45.92,113.835 L 47.837,110.886 L 45.864,108.676 C 42.191,104.562 38.083,97.793 37.662,95.161 C 37.464,93.921 37.225,93.903 36.662,95.089 C 36.42,95.599 36.112,96.015 35.978,96.015 C 35.542,96.015 34.431,91.592 33.716,87.02 C 33.188,83.638 33.111,76.567 33.563,72.864 C 34.442,65.65 36.436,58.573 39.529,51.698 C 41.146,48.103 41.179,47.986 40.639,47.755 C 36.954,46.173 35.633,45.364 33.788,43.563 C 26.203,36.151 25.461,23.741 32.009,13.802 C 38.476,3.986 49.851,-1.541 58.851,0.761 C 64.02,2.083 68.155,5.447 70.419,10.173 C 70.903,11.183 71.324,12.053 71.353,12.106 C 71.383,12.159 72.439,11.653 73.699,10.983 C 80.486,7.372 87.429,4.91 94.985,3.434 C 98.308,2.785 103.566,2.088 105.141,2.088 C 106.46,2.088 106.702,1.929 106.358,1.288 C 105.869,0.374 106.663,0.18 111.454,0.037 C 119.43,-0.2 124.928,0.686 129.897,3.008 C 131.305,3.667 132.828,4.205 133.282,4.205 C 134.401,4.205 139.589,5.566 142.321,6.575 C 145.777,7.853 147.98,8.873 151.843,10.986 C 153.805,12.058 155.507,12.936 155.625,12.936 C 155.742,12.936 155.839,12.774 155.839,12.575 C 155.839,11.551 157.864,8.284 159.521,6.634 C 162.652,3.517 166.19,2.206 170.917,2.411 C 181.072,2.852 190.467,11.632 193.069,23.114 C 193.719,25.981 193.637,32.046 192.911,34.764 C 191.374,40.523 187.922,45.21 183.686,47.289 C 182.316,47.962 182.056,48.308 182.549,48.801 C 182.998,49.25 185.989,56.051 186.943,58.791 C 188.143,62.237 189.281,66.765 190.023,71.045 C 190.527,73.955 190.614,75.417 190.614,81.066 C 190.614,87.291 190.574,87.884 189.881,91.115 C 188.945,95.506 188.175,97.796 186.369,101.569 C 182.844,108.931 177.445,114.981 169.663,120.287 C 168.463,121.106 167.481,121.85 167.481,121.942 C 167.481,122.034 168.321,123.286 169.348,124.726 C 171.23,127.363 173.898,131.573 175.921,135.097 C 176.952,136.893 177.138,137.068 179.083,138.08 C 181.13,139.145 182.6,140.298 183.403,141.47 L 183.819,142.077 L 185.506,141.41 C 188.324,140.295 190.223,139.898 193.476,139.745 C 201.192,139.382 207.36,141.945 211.966,147.429 C 218.679,155.423 218.855,167.006 212.405,176.365 C 210.923,178.515 207.13,182.285 205.26,183.466 C 204.574,183.899 204.008,184.337 204.003,184.439 C 204.003,184.541 204.797,185.068 205.779,185.61 C 210.561,188.246 213.521,190.902 214.883,193.779 C 215.579,195.25 215.634,195.599 215.632,198.541 C 215.632,201.322 215.552,201.881 215.006,203.039 C 212.909,207.492 205.077,212.641 192.083,218.112 C 174.956,225.323 149.634,229.738 119.988,230.683 C 112.324,230.928 109.568,230.941 101.864,230.773 L 101.865,230.774 M 122.142,130.144 C 132.748,129.544 137.579,129.025 143.272,127.871 C 152.127,126.076 158.724,123.639 164.944,119.865 C 177.836,112.043 184.767,102.543 187.267,89.268 C 187.914,85.829 187.894,76.652 187.227,72.335 C 186.15,65.342 183.787,57.791 180.853,51.962 C 179.598,49.469 179.127,48.769 178.659,48.703 C 178.166,48.633 178.063,48.451 178.06,47.644 C 178.05,43.52 171.587,33.794 163.403,25.57 C 160.329,22.481 159.661,21.932 158.975,21.932 C 158.418,21.932 157.937,21.684 157.421,21.133 C 156.565,20.216 155.576,18.302 155.57,17.549 C 155.57,17.267 155.48,16.897 155.368,16.726 C 154.997,16.142 147.314,11.903 144.494,10.726 C 139.533,8.655 134.461,7.115 132.599,7.115 C 131.797,7.115 131.003,6.874 130.074,6.35 C 126.832,4.518 121.943,3.351 115.603,2.896 C 113.504,2.746 111.429,2.626 110.992,2.631 L 110.198,2.641 L 110.992,3.059 C 111.829,3.5 112.976,4.459 112.976,4.716 C 112.976,4.8 110.923,4.879 108.412,4.893 C 97.407,4.952 84.637,8.377 74.612,13.96 L 71.834,15.507 L 71.924,16.829 C 72.103,19.561 70.692,22.048 68.605,22.674 C 67.133,23.116 63.651,26.002 58.976,30.656 C 54.773,34.84 50.384,40.064 50.089,41.234 C 49.999,41.589 50.129,42.945 50.379,44.248 C 50.682,45.828 50.745,46.703 50.568,46.88 C 50.423,47.026 49.105,47.264 47.641,47.409 L 44.978,47.672 L 43.679,50.083 C 39.517,57.807 36.767,67.645 36.129,77.1 L 35.968,79.481 L 36.837,77.533 C 37.706,75.584 39.22,73.512 39.545,73.828 C 39.635,73.92 39.515,75.111 39.26,76.474 C 38.578,80.181 38.634,86.358 39.384,89.862 C 40.846,96.7 43.678,101.917 49.189,107.927 C 55.71,115.038 64.777,120.74 75.498,124.472 C 84.917,127.751 94.241,129.414 107.82,130.238 C 111.064,130.434 117.808,130.391 122.144,130.146 L 122.142,130.144 M 110.953,111.528 C 108.835,110.993 106.729,109.844 105.732,108.679 C 104.631,107.393 104.327,106.404 104.867,105.865 C 105.361,105.37 105.709,105.595 106.265,106.766 C 107.183,108.701 110.254,110.05 114.168,110.236 C 117.069,110.375 118.778,110.059 119.606,109.231 C 120.157,108.679 120.273,107.25 119.955,104.927 L 119.788,103.711 L 118.329,103.409 C 111.754,102.044 106.804,97.199 109.279,94.55 C 110.198,93.567 111.035,93.183 113.698,92.522 C 115.606,92.049 116.775,91.947 120.253,91.954 C 124.906,91.964 127.413,92.37 129.583,93.47 C 131.891,94.641 132.581,95.951 131.806,97.692 C 130.678,100.226 126.963,102.479 122.172,103.538 L 121.444,103.698 L 121.444,106.353 L 121.444,109.007 L 122.436,109.434 C 122.982,109.669 124.452,109.914 125.703,109.98 C 129.494,110.179 131.972,109.165 133.483,106.798 C 134.043,105.92 134.432,105.572 134.806,105.614 C 135.217,105.66 135.322,105.847 135.278,106.453 C 135.135,108.411 132.259,110.694 129.09,111.367 C 127.179,111.772 123.638,111.579 121.983,110.979 C 120.848,110.568 120.75,110.574 119.469,111.141 C 117.831,111.866 113.136,112.08 110.953,111.528 L 110.953,111.528 M 75.658,106.053 C 70.841,105.344 66.264,101.769 64.5,97.338 C 63.663,95.234 63.663,90.448 64.5,88.335 C 65.87,84.88 67.951,82.482 72.771,78.802 C 76.523,75.937 77.853,74.544 80.697,70.503 C 83.593,66.387 85.172,64.831 87.743,63.561 C 89.692,62.597 89.926,62.546 92.33,62.546 C 94.656,62.546 95.006,62.617 96.62,63.411 C 98.671,64.42 99.796,65.6 100.842,67.834 C 104.026,74.639 100.592,88.772 93.643,97.459 C 89.768,102.304 85.53,105.145 80.961,105.961 C 78.757,106.355 77.815,106.371 75.656,106.053 L 75.658,106.053 M 93.896,87.035 C 96.305,85.807 97.919,82.837 97.523,80.362 C 97.019,77.207 94.053,74.66 91.169,74.905 C 87.657,75.203 85.143,77.945 85.143,81.479 C 85.143,86.096 89.863,89.093 93.896,87.035 L 93.896,87.035 M 89.297,86.533 C 87.335,85.597 85.99,83.578 85.99,81.569 C 85.99,77.066 90.559,74.138 94.134,76.349 C 95.703,77.318 96.838,79.355 96.838,81.199 C 96.838,85.091 92.584,88.1 89.297,86.533 L 89.297,86.533 M 93.948,80.425 C 94.569,79.804 94.72,79.426 94.713,78.507 C 94.703,76.817 93.778,75.907 92.075,75.907 C 90.968,75.907 90.311,76.292 89.829,77.225 C 88.819,79.178 89.961,81.199 92.075,81.199 C 92.937,81.199 93.341,81.032 93.948,80.425 L 93.948,80.425 M 156.459,105.25 C 153.136,104.695 149.965,102.876 146.844,99.733 C 142.068,94.923 137.74,87.109 136.36,80.802 C 135.789,78.191 135.589,72.977 135.975,70.734 C 136.597,67.122 138.288,64.603 140.981,63.281 C 142.214,62.675 142.828,62.546 144.463,62.546 C 146.138,62.546 146.715,62.674 148.167,63.368 C 150.754,64.606 152.073,65.968 155.302,70.734 C 158.376,75.273 159.435,76.415 163.86,79.974 C 166.671,82.236 167.915,83.532 169.175,85.513 C 171.926,89.84 172.166,95.187 169.787,99.152 C 168.731,100.911 166.278,103.22 164.517,104.113 C 163.05,104.856 160.193,105.546 158.75,105.505 C 158.241,105.491 157.21,105.376 156.459,105.25 L 156.459,105.25 M 148.93,87.3 C 150.111,86.697 151.522,85.171 152.037,83.938 C 152.514,82.796 152.5,80.626 152.007,79.447 C 150.905,76.809 148.145,74.899 145.882,75.209 C 142.774,75.635 140.221,78.549 140.235,81.653 C 140.235,83.028 140.982,84.931 141.9,85.93 C 143.481,87.652 146.925,88.323 148.93,87.3 M 145.389,87.039 C 142.188,86.249 140.243,82.994 141.162,79.964 C 141.751,78.023 141.98,77.813 142.176,79.036 C 142.472,80.887 144.516,82.02 146.065,81.191 C 146.858,80.766 147.444,79.41 147.259,78.425 C 147.085,77.498 146.414,76.758 145.299,76.263 C 144.633,75.967 144.664,75.949 145.878,75.928 C 147.509,75.901 148.665,76.453 149.992,77.893 C 151.215,79.219 151.731,80.803 151.501,82.519 C 151.119,85.36 147.983,87.679 145.389,87.039 L 145.389,87.039"
+          fill="#000000"
+          clipPath="url(#headClip)"
+        />
+      </g>
+
+      {/* === BAMBOO STALK (#145D3C) === */}
+      <g id="bamboo">
+        {/* Bamboo segment 1 (top) */}
+        <path d="M 184 38 L 182 72" stroke="#000000" strokeWidth="9.5" strokeLinecap="round" />
+        <path d="M 184 38 L 182 72" stroke="#145D3C" strokeWidth="6.5" strokeLinecap="round" />
+        <ellipse cx="183" cy="72" rx="4.5" ry="2" fill="#093822" stroke="#000000" strokeWidth="1.8" />
+
+        {/* Bamboo segment 2 (mid) */}
+        <path d="M 182 74 L 180 112" stroke="#000000" strokeWidth="9.5" strokeLinecap="round" />
+        <path d="M 182 74 L 180 112" stroke="#145D3C" strokeWidth="6.5" strokeLinecap="round" />
+        <ellipse cx="181" cy="112" rx="4.5" ry="2" fill="#093822" stroke="#000000" strokeWidth="1.8" />
+
+        {/* Bamboo segment 3 (lower) */}
+        <path d="M 180 114 L 178 156" stroke="#000000" strokeWidth="9.5" strokeLinecap="round" />
+        <path d="M 180 114 L 178 156" stroke="#145D3C" strokeWidth="6.5" strokeLinecap="round" />
+
+        {/* Leaves (Bold black outlines, #145D3C fill) */}
+        <path
+          d="M 184 39 Q 198 28 210 33 Q 197 45 184 39 Z"
+          fill="#145D3C"
+          stroke="#000000"
+          strokeWidth="2.5"
+          strokeLinejoin="round"
+        />
+        <path
+          d="M 183 41 Q 170 27 160 32 Q 173 42 183 41 Z"
+          fill="#1D7B51"
+          stroke="#000000"
+          strokeWidth="2.5"
+          strokeLinejoin="round"
+        />
+        <path
+          d="M 183 73 Q 199 63 211 69 Q 198 80 183 73 Z"
+          fill="#145D3C"
+          stroke="#000000"
+          strokeWidth="2.5"
+          strokeLinejoin="round"
+        />
+        <path
+          d="M 182 75 Q 169 64 160 70 Q 173 78 182 75 Z"
+          fill="#1D7B51"
+          stroke="#000000"
+          strokeWidth="2.5"
+          strokeLinejoin="round"
+        />
+        <path
+          d="M 181 113 Q 197 105 208 112 Q 195 121 181 113 Z"
+          fill="#145D3C"
+          stroke="#000000"
+          strokeWidth="2.5"
+          strokeLinejoin="round"
+        />
+      </g>
+
+      {/* === OPEN ORANGE BOOK (#E88051, NO TEXT) === */}
+      <g id="book">
+        {/* Solid Orange Outer Cover in exact #E88051 */}
+        <path
+          d="M 46 132 C 76 139, 104 136, 108 134 C 112 136, 140 139, 170 132 L 174 177 C 142 184, 112 181, 108 178 C 104 181, 74 184, 42 177 Z"
+          fill="#E88051"
+          stroke="#000000"
+          strokeWidth="4.5"
+          strokeLinejoin="round"
+        />
+
+        {/* Orange Cover Flap Highlights */}
+        <path d="M 44 133 L 42 176" stroke="#FA9F75" strokeWidth="2" strokeLinecap="round" />
+        <path d="M 172 133 L 174 176" stroke="#FA9F75" strokeWidth="2" strokeLinecap="round" />
+
+        {/* Spine Center Band */}
+        <path d="M 106 133 L 110 133 L 110 178 L 106 178 Z" fill="#BA4C1D" stroke="#000000" strokeWidth="1" />
+
+        {/* Left Open Page (Crisp Clean Cream, NO TEXT) */}
+        <path
+          d="M 50 136 C 72 142, 97 140, 105 137 L 105 173 C 97 176, 72 178, 47 172 Z"
+          fill="#FFFDF8"
+          stroke="#000000"
+          strokeWidth="2.6"
+          strokeLinejoin="round"
+        />
+
+        {/* Right Open Page (Crisp Clean Cream, NO TEXT) */}
+        <path
+          d="M 111 137 C 119 140, 144 142, 166 136 L 169 172 C 144 178, 119 176, 111 173 Z"
+          fill="#FFFDF8"
+          stroke="#000000"
+          strokeWidth="2.6"
+          strokeLinejoin="round"
+        />
+
+        {/* Center Fold Spine Line */}
+        <line x1="108" y1="137" x2="108" y2="173" stroke="#000000" strokeWidth="1.8" />
+      </g>
+
+      {/* === PANDA PAWS HOLDING BOOK & BAMBOO === */}
+      {/* Left Arm & Paw clasping left book edge */}
+      <g id="leftArm">
+        <path d="M 34 145 C 32 158, 38 168, 48 163 C 54 160, 52 148, 44 145 Z" fill="#000000" />
+        <ellipse cx="48" cy="158" rx="7.5" ry="9.5" fill="#000000" stroke="#000000" strokeWidth="2.5" />
+        <circle cx="45" cy="155" r="1.6" fill="#FFFFFF" />
+        <circle cx="45" cy="160" r="1.6" fill="#FFFFFF" />
+      </g>
+
+      {/* Right Arm & Paw clasping right book edge & bamboo stalk */}
+      <g id="rightArm">
+        <path d="M 180 145 C 182 158, 176 168, 166 163 C 160 160, 162 148, 170 145 Z" fill="#000000" />
+        <ellipse cx="168" cy="156" rx="7.5" ry="9.5" fill="#000000" stroke="#000000" strokeWidth="2.5" />
+        <circle cx="171" cy="153" r="1.6" fill="#FFFFFF" />
+        <circle cx="171" cy="158" r="1.6" fill="#FFFFFF" />
+      </g>
+
+      {/* === READING GLASSES (Round Wireframes on Face) === */}
+      <g id="glasses">
+        {/* Left Lens Frame (Centered around eye patch at 84, 85) */}
+        <circle cx="84" cy="85" r="14.5" fill="none" stroke="#E69C3D" strokeWidth="3" />
+        <circle cx="84" cy="85" r="16.2" fill="none" stroke="#000000" strokeWidth="1.2" opacity="0.5" />
+
+        {/* Right Lens Frame (Centered around eye patch at 154, 85) */}
+        <circle cx="154" cy="85" r="14.5" fill="none" stroke="#E69C3D" strokeWidth="3" />
+        <circle cx="154" cy="85" r="16.2" fill="none" stroke="#000000" strokeWidth="1.2" opacity="0.5" />
+
+        {/* Golden Bridge connecting across nose */}
+        <path d="M 98.5 82 Q 119 77 139.5 82" fill="none" stroke="#E69C3D" strokeWidth="3" strokeLinecap="round" />
+
+        {/* Side Temples */}
+        <path d="M 69.5 85 L 56 82" stroke="#E69C3D" strokeWidth="2.5" strokeLinecap="round" />
+        <path d="M 168.5 85 L 176 83" stroke="#E69C3D" strokeWidth="2.5" strokeLinecap="round" />
+
+        {/* Reflection Gleams on Lenses */}
+        <path
+          d="M 76 77 Q 84 73 90 78"
+          stroke="#FFFFFF"
+          strokeWidth="2.4"
+          strokeLinecap="round"
+          fill="none"
+          opacity="0.95"
+        />
+        <path
+          d="M 146 77 Q 154 73 160 78"
+          stroke="#FFFFFF"
+          strokeWidth="2.4"
+          strokeLinecap="round"
+          fill="none"
+          opacity="0.95"
+        />
+      </g>
     </svg>
   );
 }
+

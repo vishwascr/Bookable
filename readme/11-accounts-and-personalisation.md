@@ -97,24 +97,23 @@ Example `/api/me/recommend` result item:
 ## Frontend
 | Component | Role |
 |---|---|
-| `AuthPage.jsx` | Signup & login card featuring the brand mascot, tagline **“Bookable - Where wisdom meets technology”**, and auth state switching |
-| `LogoutPage.jsx` | Dedicated session termination screen displaying the brand mascot, tagline, and direct **“Log Back In →”** button returning to the login form |
-| `Mascot.jsx` | Friendly panda mascot wearing reading glasses, reading an orange book, holding a stalk of bamboo, sitting on a purple pastel cloud; bundled as high-res raster asset (`client/public/mascot.png`) and fallback vector SVG |
+| `AuthPage.jsx` | Signup & login card featuring the SVG brand mascot, tagline **“Bookable - Where wisdom meets technology”**, and auth state switching |
+| `LogoutPage.jsx` | Dedicated session termination screen displaying the SVG brand mascot, tagline, and direct **“Log Back In →”** button returning to the login form |
+| `Mascot.jsx` | Scalable vector SVG of the Bookable Panda mascot inspired by `readme/tibbixel-dot-com-37658-svg.svg`, wearing reading glasses, reading an orange book (`#E88051`, without text), holding green bamboo (`#145D3C`), sitting on a royal blue cushion (`#0B4D91`) |
 | `Onboarding.jsx` | Progress dots (x/5), selected-book chips, search, Popular grid with ✓ overlay; also used for editing favourites |
 | `ForYou.jsx` | Favourites strip, algorithm tabs + Compare all, hybrid sliders, explanation panel, results with *Because you liked…*, per-favourite contribution bars, expandable feature breakdown, **+ Want to Read** |
 | `Shelves.jsx` | *My Books*: Favourites and Want to Read grids |
 | `App.jsx` | View state machine: `home · search · explore · login · signup · logout · onboarding · foryou · shelves`; restores session from the stored JWT on load |
 
 ## Mascot Character & Design Specification
-The Bookable mascot follows an intentional brand character design:
-- **Character**: Friendly, wise, cute giant panda
-- **Reading Glasses**: Round honey-gold wireframe glasses perched on the nose, symbolizing wisdom and scholarship
-- **Book**: Holding and engrossed in an open orange book titled *"Stories: The Giant Panda's Journey"*
-- **Bamboo**: Holding a fresh green bamboo stalk with tender leaves in the other hand
-- **Setting**: Sitting cross-legged comfortably atop a soft, puffy pastel purple cloud
-- **Palette**: Soft pastel tones (lavender cloud `#E2D4F8` / `#C4ACED`, warm orange `#FFB380` / `#F57E42`, fresh bamboo `#A2E3B8`, soft rose cheeks)
-- **Placement**: Prominently featured on the **Login / Signup page (`AuthPage.jsx`)**, the **Logout confirmation page (`LogoutPage.jsx`)**, and the **Home landing hero (`App.jsx`)**
-- **Assets**: Bundled at `client/public/mascot.png`, `client/public/mascot.jpg`, `client/src/assets/mascot.png`, plus a zero-dependency scalable SVG fallback inside `<Mascot />`.
+The Bookable mascot is implemented directly as a scalable vector SVG, styled after the cartoon line art in `readme/tibbixel-dot-com-37658-svg.svg`:
+- **Format**: Pure SVG (`<svg viewBox="0 0 217 231">`) with responsive sizes (`sm`, `md`, `lg`) and standalone vector assets at `client/public/mascot.svg` and `client/src/assets/mascot.svg`.
+- **Character**: Friendly, bold-outline cartoon panda with cheek tufts, teardrop eye patches, shining eyes, and a sweet smile.
+- **Reading Glasses**: Round honey-gold wireframe glasses perched on the nose, framing the eyes with glass gleams.
+- **Book**: Holding an open orange book with clean, blank cream pages (no text printed on pages) using exact color **`#E88051`**.
+- **Bamboo**: Holding a fresh green bamboo stalk with segmented nodes and tender leaves in the other hand using exact color **`#145D3C`**.
+- **Cushion**: Sitting cross-legged comfortably atop a plush, tufted cushion using exact color **`#0B4D91`**.
+- **Placement**: Prominently featured on the **Login / Signup page (`AuthPage.jsx`)**, the **Logout confirmation page (`LogoutPage.jsx`)**, and the **Home landing hero (`App.jsx`)**.
 
 ## Security notes
 - Passwords hashed with bcrypt; login errors don't reveal whether the username exists.
