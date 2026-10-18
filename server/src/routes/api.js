@@ -18,17 +18,47 @@ r.get('/algorithms', (req, res) =>
   })
 );
 
-// GET /api/books/search?q=harry potter&limit=20
+// GET /api/books/search?q=harry potter&limit=20&page=1
 r.get('/books/search', async (req, res, next) => {
   try {
     const q = String(req.query.q || '').trim();
-    const limit = Math.min(parseInt(req.query.limit, 10) || 20, 50);
-    if (q.length < 2) return res.json([]);
-    const docs = await Book.find({ $text: { $search: q } }, { score: { $meta: 'textScore' }, _id: 0 })
-      .sort({ score: { $meta: 'textScore' } })
-      .limit(limit)
-      .lean();
-    res.json(docs.map(({ score, ...d }) => ({ ...d, title: decode(d.title), author: decode(d.author), publisher: decode(d.publisher) })));
+    const limit = Math.min(Math.max(parseInt(req.query.limit, 10) || 20, 1), 100);
+    const hasPagination = req.query.page !== undefined || req.query.paginate === 'true';
+    const page = Math.max(parseInt(req.query.page, 10) || 1, 1);
+    const skip = (page - 1) * limit;
+
+    if (q.length < 2) {
+      return res.json(hasPagination ? { books: [], total: 0, page: 1, totalPages: 0, limit } : []);
+    }
+
+    const filter = { $text: { $search: q } };
+    const [docs, total] = await Promise.all([
+      Book.find(filter, { score: { $meta: 'textScore' }, _id: 0 })
+        .sort({ score: { $meta: 'textScore' } })
+        .skip(skip)
+        .limit(limit)
+        .lean(),
+      hasPagination ? Book.countDocuments(filter) : Promise.resolve(null),
+    ]);
+
+    const books = docs.map(({ score, ...d }) => ({
+      ...d,
+      title: decode(d.title),
+      author: decode(d.author),
+      publisher: decode(d.publisher),
+    }));
+
+    if (hasPagination) {
+      return res.json({
+        books,
+        total,
+        page,
+        totalPages: Math.ceil(total / limit),
+        limit,
+      });
+    }
+
+    res.json(books);
   } catch (e) { next(e); }
 });
 

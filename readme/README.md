@@ -16,6 +16,7 @@ Bookable is a **MERN** (MongoDB · Express · React · Node) web app that recomm
 | [08-setup.md](08-setup.md) | How to install, import and run |
 | [09-testing.md](09-testing.md) | Verification performed and how to re-run it |
 | [10-future-work.md](10-future-work.md) | Known limitations and next steps |
+| [11-accounts-and-personalisation.md](11-accounts-and-personalisation.md) | User accounts, Goodreads onboarding, mascot slot, tagline, logout flow, and personalised recommendations |
 
 ## Quick start
 ```bash

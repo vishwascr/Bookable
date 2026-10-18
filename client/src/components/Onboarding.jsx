@@ -17,7 +17,7 @@ export default function Onboarding({ initial = [], onDone, onCancel, editing = f
 
   useEffect(() => {
     if (q.trim().length < 2) { setResults([]); return; }
-    const t = setTimeout(() => api.searchPaginated(q.trim(), 1, 12).then((r) => setResults(r.books)).catch(() => {}), 250);
+    const t = setTimeout(() => api.searchPaginated(q.trim(), 1, 12).then((r) => setResults(Array.isArray(r) ? r : r?.books || [])).catch(() => { }), 250);
     return () => clearTimeout(t);
   }, [q]);
 

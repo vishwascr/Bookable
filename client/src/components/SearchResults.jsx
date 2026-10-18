@@ -22,7 +22,16 @@ export default function SearchResults({ query, onSelectSeed, onClearSearch }) {
 
     api.searchPaginated(query.trim(), page, PAGE_SIZE)
       .then((res) => {
-        setData(res);
+        if (Array.isArray(res)) {
+          setData({ books: res, total: res.length, page: 1, totalPages: 1 });
+        } else {
+          setData({
+            books: res?.books || [],
+            total: res?.total || 0,
+            page: res?.page || 1,
+            totalPages: res?.totalPages || 0,
+          });
+        }
       })
       .catch((err) => {
         setError(err.message || 'Failed to load search results');
