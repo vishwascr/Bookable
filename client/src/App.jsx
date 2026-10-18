@@ -12,6 +12,7 @@ import LogoutPage from './components/LogoutPage.jsx';
 import Onboarding from './components/Onboarding.jsx';
 import ForYou from './components/ForYou.jsx';
 import Shelves from './components/Shelves.jsx';
+import Mascot from './components/Mascot.jsx';
 
 const SAMPLE_SEARCHES = [
   'Hobbit',
@@ -225,6 +226,9 @@ export default function App() {
       {view === 'home' && (
         <section className="empty-state-hero">
           <div className="hero-content">
+            <div className="mascot-slot hero-mascot-wrap">
+              <Mascot size="lg" />
+            </div>
             <h2>Find books & discover algorithms</h2>
             <p>
               Type any title or author in the search bar and press <kbd>Enter</kbd> to explore search results, or click a suggestion below:

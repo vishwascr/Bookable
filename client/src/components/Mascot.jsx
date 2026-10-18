@@ -1,8 +1,9 @@
 import { useState } from 'react';
+import mascotAsset from '../assets/mascot.png';
 
 // Mascot component: Panda with reading glasses, reading an orange book, holding bamboo, sitting on a purple pastel cloud.
 // Supports custom image if provided via props/asset, with a rich standalone SVG as default/fallback.
-export default function Mascot({ src = '/mascot.png', size = 'md', className = '', alt = 'Bookable Panda Mascot' }) {
+export default function Mascot({ src = mascotAsset, size = 'md', className = '', alt = 'Bookable Panda Mascot - Where wisdom meets technology' }) {
   const [imgFailed, setImgFailed] = useState(false);
 
   // If a raster image is supplied and loads successfully, render it

@@ -1361,8 +1361,43 @@ details summary {
   display: flex;
   justify-content: center;
   align-items: center;
-  margin: 0 auto 8px;
+  margin: 0 auto 10px;
   width: 100%;
+}
+
+.mascot-img,
+.mascot-svg {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  object-fit: contain;
+  filter: drop-shadow(0 6px 16px rgba(138, 92, 246, 0.16));
+  transition: transform 0.25s ease;
+  user-select: none;
+}
+
+.mascot-img:hover,
+.mascot-svg:hover {
+  transform: translateY(-3px) scale(1.02);
+}
+
+.mascot-sm {
+  width: 90px;
+  height: 90px;
+}
+
+.mascot-md {
+  width: 140px;
+  height: 140px;
+}
+
+.mascot-lg {
+  width: 200px;
+  height: 200px;
+}
+
+.hero-mascot-wrap {
+  margin-bottom: 16px;
 }
 
 .mascot-placeholder {

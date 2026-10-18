@@ -1,5 +1,6 @@
 import { useEffect } from 'react';
 import { setToken } from '../api.js';
+import Mascot from './Mascot.jsx';
 
 export default function LogoutPage({ onGoLogin, onGoHome }) {
   useEffect(() => {
@@ -9,12 +10,9 @@ export default function LogoutPage({ onGoLogin, onGoHome }) {
   return (
     <section className="auth-page logout-page">
       <div className="auth-card logout-card">
-        {/* Designated slot for upcoming mascot */}
-        <div className="mascot-slot" aria-label="Bookable Mascot Slot">
-          <div className="mascot-placeholder">
-            <span className="mascot-icon">🦉</span>
-            <span className="mascot-badge">Mascot Slot</span>
-          </div>
+        {/* Friendly Panda Mascot */}
+        <div className="mascot-slot" aria-label="Bookable Mascot">
+          <Mascot size="md" />
         </div>
 
         <div className="auth-branding">

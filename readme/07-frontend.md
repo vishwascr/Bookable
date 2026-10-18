@@ -85,9 +85,10 @@ flowchart TD
 ## Component Hierarchy & Directory
 | Component | File Path | Role |
 |---|---|---|
-| `App.jsx` | `client/src/App.jsx` | Top-level state coordinator: view routing (`home`, `search`, `explore`, `login`, `signup`, `logout`, `onboarding`, `foryou`, `shelves`), session management, and navigation |
-| `AuthPage.jsx` | `client/src/components/AuthPage.jsx` | Login and Signup forms featuring the tagline *"Bookable - Where wisdom meets technology"* and the reserved Mascot Slot |
-| `LogoutPage.jsx` | `client/src/components/LogoutPage.jsx` | Dedicated logout confirmation screen with mascot slot, tagline, and direct "Log Back In" button |
+| `App.jsx` | `client/src/App.jsx` | Top-level state coordinator: view routing (`home`, `search`, `explore`, `login`, `signup`, `logout`, `onboarding`, `foryou`, `shelves`), session management, hero with mascot, and navigation |
+| `Mascot.jsx` | `client/src/components/Mascot.jsx` | Bookable's friendly Panda mascot (wearing reading glasses, reading an orange book, holding bamboo, sitting on a pastel purple cloud) supporting custom image assets and scalable inline pastel SVG fallback |
+| `AuthPage.jsx` | `client/src/components/AuthPage.jsx` | Login and Signup forms featuring the brand mascot, the tagline *"Bookable - Where wisdom meets technology"*, and instant switching |
+| `LogoutPage.jsx` | `client/src/components/LogoutPage.jsx` | Dedicated logout confirmation screen with brand mascot, tagline, and direct "Log Back In" button |
 | `Onboarding.jsx` | `client/src/components/Onboarding.jsx` | Goodreads-style 3–5 book selector with search and popular books grid |
 | `ForYou.jsx` | `client/src/components/ForYou.jsx` | Personalized recommendation dashboard aggregated across favorite seeds with per-favorite contribution bars |
 | `Shelves.jsx` | `client/src/components/Shelves.jsx` | Displays user's Favorites and Want to Read reading lists |
