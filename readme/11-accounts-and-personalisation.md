@@ -7,15 +7,18 @@ liked…"* recommendation rows.
 | # | Question | Decision |
 |---|---|---|
 | 1 | How do accounts work? | **Real accounts**: username + password (bcrypt, cost 10) in MongoDB; **JWT** (7-day) stored in `localStorage`; signup / login / logout. |
-| 2 | Onboarding selection | **Goodreads-style**: after signup, *"Pick 3–5 books you love"* with search + curated **Popular** grid; at least 3 required. Saved as the **Favourites** shelf, editable later. |
-| 3 | Combining favourites | **Profile aggregation**: run each algorithm for every favourite, average scores per candidate, exclude favourites; each result shows *"Because you liked X, Y"* + per-favourite contribution bars. Same algorithm tabs + Compare all. |
-| 4 | Fit with existing app | Logged-in users land on **For You**; search & single-book explorer remain public. Simple **Want to Read** shelf (one-click add from any recommendation). |
+| 2 | Brand Tagline | Prominently display the official slogan: **“Bookable - Where wisdom meets technology”** across auth and logout screens. |
+| 3 | Mascot Slot | Reserve a dedicated, responsive container (`.mascot-slot`) centered above the auth card for an upcoming character/mascot asset. |
+| 4 | Logout Experience | Dedicated **Logout Page** confirming session termination with an immediate button to log back in. |
+| 5 | Onboarding selection | **Goodreads-style**: after signup, *"Pick 3–5 books you love"* with search + curated **Popular** grid; at least 3 required. Saved as the **Favourites** shelf, editable later. |
+| 6 | Combining favourites | **Profile aggregation**: run each algorithm for every favourite, average scores per candidate, exclude favourites; each result shows *"Because you liked X, Y"* + per-favourite contribution bars. Same algorithm tabs + Compare all. |
+| 7 | Fit with existing app | Logged-in users land on **For You**; search & single-book explorer remain public. Simple **Want to Read** shelf (one-click add from any recommendation). |
 
 ## User journey
 ```mermaid
 flowchart TD
-  V["Visitor (logged out)"] -->|"Sign up"| SU["Signup form"]
-  V -->|"Log in"| LI["Login form"]
+  V["Visitor (logged out)"] -->|"Sign up"| SU["Signup form with Mascot Slot & Tagline"]
+  V -->|"Log in"| LI["Login form with Mascot Slot & Tagline"]
   V -->|"search / explore"| EX["Public search & single-book explorer"]
   SU --> OB["Onboarding: pick 3-5 favourite books"]
   LI -->|"has >= 3 favourites"| FY["For You page"]
@@ -23,6 +26,9 @@ flowchart TD
   OB -->|"Save (>= 3)"| FY
   FY -->|"switch algorithm / compare all / sliders"| FY
   FY -->|"+ Want to Read"| SH["My Books: Favourites + Want to Read"]
+  FY -->|"Log out"| LO["Logout Page: Mascot Slot + Confirmation"]
+  LO -->|"Log Back In"| LI
+  LO -->|"Continue as guest"| EX
   FY -->|"Edit favourites"| OB
   FY -->|"click a title"| EX
   SH --> EX
@@ -91,13 +97,35 @@ Example `/api/me/recommend` result item:
 ## Frontend
 | Component | Role |
 |---|---|
-| `AuthPage.jsx` | Signup / login card with inline validation errors; toggles between modes |
+| `AuthPage.jsx` | Signup & login card featuring the tagline **“Bookable - Where wisdom meets technology”** and the reserved **Mascot Slot** container (`.mascot-slot`) |
+| `LogoutPage.jsx` | Dedicated session termination screen displaying the tagline, mascot slot, and a direct **“Log Back In →”** button returning to the login form |
 | `Onboarding.jsx` | Progress dots (x/5), selected-book chips, search, Popular grid with ✓ overlay; also used for editing favourites |
 | `ForYou.jsx` | Favourites strip, algorithm tabs + Compare all, hybrid sliders, explanation panel, results with *Because you liked…*, per-favourite contribution bars, expandable feature breakdown, **+ Want to Read** |
 | `Shelves.jsx` | *My Books*: Favourites and Want to Read grids |
-| `App.jsx` | View state machine: `home · search · explore · auth · onboarding · foryou · shelves`; restores session from the stored JWT on load |
+| `App.jsx` | View state machine: `home · search · explore · login · signup · logout · onboarding · foryou · shelves`; restores session from the stored JWT on load |
+
+## Mascot Slot Implementation
+The mascot slot is styled via `.mascot-slot` with centered flexbox alignment and a `.mascot-placeholder` wrapper:
+```css
+.mascot-slot {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 0 auto 8px;
+  width: 100%;
+}
+.mascot-placeholder {
+  width: 130px;
+  height: 110px;
+  background: #faf7f2;
+  border: 2px dashed #ded4c5;
+  border-radius: 18px;
+  /* Ready to receive SVG / image asset */
+}
+```
 
 ## Security notes
 - Passwords hashed with bcrypt; login errors don't reveal whether the username exists.
 - Set `JWT_SECRET` in `server/.env` for anything beyond local use (a dev fallback is built in).
 - JWT in `localStorage` is fine for this demo; for production prefer httpOnly cookies + CSRF protection.
+

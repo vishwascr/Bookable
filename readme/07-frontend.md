@@ -6,60 +6,91 @@ Vite + React 19, plain CSS (`client/src/styles.css`), no UI component libraries.
 
 ```mermaid
 flowchart TD
-  LANDING["Landing State: Search input + sample suggestion pills"] -->|"type & press Enter / click Search"| SR["Search Results Page: paginated grid of books"]
-  LANDING -->|"click sample suggestion pill"| SR
-  LANDING -->|"click suggestion in live dropdown"| REC["Recommendation View: Seed book & algorithm results"]
+  LANDING["Landing State: Search input + sample pills"] -->|"type & press Enter / click Search"| SR["Search Results Page: paginated grid"]
+  LANDING -->|"click sample pill"| SR
+  LANDING -->|"click suggestion in live dropdown"| REC["Recommendation View: Single-book explorer"]
+  LANDING -->|"click 'Log In'"| LOGIN["Login Page: Tagline + Mascot Slot"]
+  LANDING -->|"click 'Sign Up'"| SIGNUP["Signup Page: Tagline + Mascot Slot"]
   
-  SR -->|"click '✨ Get Recommendations' on book card"| REC
-  SR -->|"next / previous page"| SR
+  LOGIN -->|"authenticated (has favorites)"| FY["For You: Profile recommendations"]
+  LOGIN -->|"authenticated (needs favorites)"| ONB["Onboarding: Pick 3-5 favorite books"]
+  SIGNUP -->|"account created"| ONB
+  ONB -->|"save favorites"| FY
   
-  REC -->|"click '← Back to Search Results'"| SR
-  REC -->|"type new query & press Enter"| SR
-  REC -->|"click any recommendation card"| REC
-  REC -->|"switch algorithm or compare all"| REC
-  REC -->|"adjust hybrid sliders"| REC
+  SR -->|"click 'Get Recommendations' on card"| REC
+  REC -->|"click 'Back to Search Results'"| SR
+  
+  FY -->|"click 'Log out'"| LOGOUT["Logout Page: Mascot slot + Confirmation"]
+  LOGOUT -->|"click 'Log Back In'"| LOGIN
+  LOGOUT -->|"click 'Continue as guest'"| LANDING
+  
+  FY -->|"click 'My Books'"| SHELVES["My Books: Favorites & Want to Read"]
+  FY -->|"click any book title"| REC
 ```
 
-## Three Main App States
+---
 
-### 1. Landing Screen (Empty / Initial State)
+## App Views & Interactive States
+
+### 1. Landing Screen (Public Guest View)
 - Prominent search input with search icon, clear button (`✕`), and "Search" button.
 - Clickable suggestion pills (`“Hobbit”`, `“Harry Potter”`, `“Stephen King”`, `“Dune”`, `“Tolkien”`, etc.) for instant one-click searching.
 - Live autocomplete dropdown appears as user types for quick direct selection.
+- Call-to-action banner inviting guests to create an account for personalized multi-book recommendations.
 
-### 2. Dedicated Search Results Page (`SearchResults.jsx`)
-- Triggered when the user:
-  - Types in the search bar and **hits Return / Enter**.
-  - Clicks the **Search** button.
-  - Clicks the **“View all search results for ‘...’”** footer in the autocomplete dropdown.
-  - Clicks a sample search pill.
-- **Header:** Displays query highlight, total count badge (`Found X books`), and a clear search button.
-- **Responsive Card Grid:**
-  - Book cover with automatic missing-image fallback.
-  - Book title (truncated cleanly to 2 lines max).
-  - Author, publication year, and publisher.
-  - Monospace ISBN tag.
-  - Clear **“✨ Get Recommendations →”** call-to-action button.
-- **Pagination Controls:** Previous and Next buttons with active `Page X of Y` indicator (24 books per page).
-- **Empty State:** Helpful tips (check spelling, search by author or keyword) when no books match.
+### 2. Login & Sign Up Pages (`AuthPage.jsx`)
+- **Brand Tagline:** Prominently displays the official motto:  
+  **“Bookable - Where wisdom meets technology”**
+- **Designated Mascot Slot (`.mascot-slot`):** Dedicated styled container with centered dimensions (`130px × 110px`), dashed border, rounded corners, and a visual placeholder badge, engineered so any SVG, 3D character, or image can be dropped in.
+- **Form Controls:** Clean input fields for username and password (plus optional display name for signup).
+- **Mode Toggle:** Seamless switching between "Log in" and "Create an account".
+- **Guest Option:** "← Continue browsing as guest" returns directly to public exploration.
 
-### 3. Recommendation View
-- **Breadcrumb Navigation:** Displays `← Back to Search Results for “{query}”` so users can return to the search list without retyping.
-- **Sidebar (Aside):**
-  - **Seed Book Panel:** Cover, full title, author, year, publisher, ISBN, and its **TF-IDF title terms** (reveals what the content algorithm extracted).
-  - **Hybrid Weight Sliders:** Real-time sliders for Title, Author, Publisher, and Year percentages (active in Hybrid and Compare modes).
-  - **“How It Works” Panel:** Formula, overview, and step-by-step description for the currently active algorithm.
-- **Main Area:**
-  - Algorithm selector tabs (`TF-IDF`, `Same Author`, `Same Publisher & Era`, `Era + Theme`, `Weighted Hybrid`, and `⚖️ Compare all`).
-  - Result cards with rank, cover, title, author, year, final score bar, and per-feature breakdown bars (`Title`, `Author`, `Publisher`, `Year`).
-  - Interactive exploration: clicking any recommended book immediately makes it the new seed.
+### 3. Dedicated Logout Page (`LogoutPage.jsx`)
+- Triggered when the user clicks **“Log out”** in the navigation bar.
+- Clears stored auth tokens from `localStorage` and resets session state.
+- Features the mascot slot and the brand tagline **“Bookable - Where wisdom meets technology”**.
+- Shows a friendly confirmation: *"You have been logged out. Thank you for visiting Bookable. Your session has safely ended."*
+- Prominent primary button: **“Log Back In →”** navigating directly back to the login page.
+- Secondary option: **“← Continue browsing as guest”** to browse the public explorer.
+
+### 4. Goodreads-Inspired Onboarding (`Onboarding.jsx`)
+- Interactive step required after signup or when editing favorites.
+- Users pick 3–5 books they love using either the search bar or the curated 28-book **Popular on Bookable** grid.
+- Visual selection counter (`3 / 5 selected`), book chips with remove buttons (`✕`), and checkmark badge overlays.
+- Requires at least 3 books before proceeding to generate profile recommendations.
+
+### 5. Personalised "For You" Page (`ForYou.jsx`)
+- Greets the user: *"Recommended for {DisplayName}"*.
+- **Favorites Strip:** Displays the user's seed books with an "Edit" button to adjust favorites at any time.
+- **Algorithm Switcher & Compare All:** Explore how all 5 algorithms interpret the user's multi-book taste profile.
+- **Explainability:** Each recommended card explains *"Because you liked {Title 1}, {Title 2}"* and provides per-seed score contribution bars.
+- **Want to Read Shelf Action:** "+ Want to Read" button lets users save recommendations to their personal reading list with one click.
+
+### 6. My Books Shelves (`Shelves.jsx`)
+- Displays the user's **Favorites** (the seeds powering their recommendations).
+- Displays the **Want to Read** shelf with book covers and one-click removal.
+
+### 7. Dedicated Search Results Page (`SearchResults.jsx`)
+- Triggered by pressing <kbd>Enter</kbd> or clicking "Search".
+- Responsive book card grid with covers, titles, authors, publishers, years, ISBN tags, and "✨ Get Recommendations →" action buttons.
+- Full server-backed pagination (24 books per page) with Previous and Next controls.
+
+### 8. Single-Book Recommendation View
+- Breadcrumbs for easy navigation back to Search Results or the "For You" page.
+- Explains single-book TF-IDF terms, formula, candidate counts, and feature breakdown bars.
 
 ---
 
 ## Component Hierarchy & Directory
 | Component | File Path | Role |
 |---|---|---|
-| `App.jsx` | `client/src/App.jsx` | Top-level state coordinator: manages view mode (landing / search results / recommendation), active seed, algorithm, weights, and health status |
+| `App.jsx` | `client/src/App.jsx` | Top-level state coordinator: view routing (`home`, `search`, `explore`, `login`, `signup`, `logout`, `onboarding`, `foryou`, `shelves`), session management, and navigation |
+| `AuthPage.jsx` | `client/src/components/AuthPage.jsx` | Login and Signup forms featuring the tagline *"Bookable - Where wisdom meets technology"* and the reserved Mascot Slot |
+| `LogoutPage.jsx` | `client/src/components/LogoutPage.jsx` | Dedicated logout confirmation screen with mascot slot, tagline, and direct "Log Back In" button |
+| `Onboarding.jsx` | `client/src/components/Onboarding.jsx` | Goodreads-style 3–5 book selector with search and popular books grid |
+| `ForYou.jsx` | `client/src/components/ForYou.jsx` | Personalized recommendation dashboard aggregated across favorite seeds with per-favorite contribution bars |
+| `Shelves.jsx` | `client/src/components/Shelves.jsx` | Displays user's Favorites and Want to Read reading lists |
 | `SearchBar.jsx` | `client/src/components/SearchBar.jsx` | Form input handling Return key submits, search button, clear button, and debounced autocomplete dropdown |
 | `SearchResults.jsx` | `client/src/components/SearchResults.jsx` | Dedicated search results page with book card grid, metadata, and pagination controls |
 | `Cover.jsx` | `client/src/components/Cover.jsx` | Book cover image loader with fallback to letter initials for missing or 1×1 placeholder images |

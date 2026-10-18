@@ -2,13 +2,16 @@
 
 Base URL: `http://localhost:5050/api` (proxied as `/api` by Vite in dev).
 
+## Public Endpoints
+
 | Method | Path | Description |
 |---|---|---|
 | GET | `/health` | `{ ok, ready, stats: { books, vocabulary, authors, publishers, buildMs } }` |
 | GET | `/algorithms` | List of algorithms (`key, name, short, formula, explain[]`) + `defaultWeights` |
 | GET | `/books/search?q=&page=&limit=` | Mongo `$text` search on title/author with pagination metadata |
 | GET | `/books/:isbn` | `{ book, terms }` — terms = TF-IDF weights of the title |
-| GET | `/recommend/:isbn` | Recommendations (see below) |
+| GET | `/books/popular` | Curated list of 28 popular books used for onboarding |
+| GET | `/recommend/:isbn` | Single-book recommendations (see below) |
 
 ### `GET /books/search`
 Query parameters:
@@ -43,6 +46,7 @@ Response when `page` is provided:
 *(When `page` is omitted, returns array `[...]` directly for lightweight autocomplete requests).*
 
 ### `GET /recommend/:isbn`
+Single-book recommendations based on a single seed.
 | Query | Default | Notes |
 |---|---|---|
 | `algo` | `hybrid` | `tfidf` \| `author` \| `publisher` \| `year` \| `hybrid` \| `all` |
@@ -65,10 +69,57 @@ Response:
 }
 ```
 
+---
+
+## User Accounts & Personalised Endpoints
+
+All authenticated endpoints require an `Authorization: Bearer <jwt_token>` header.
+
+| Method | Path | Auth | Description |
+|---|---|---|---|
+| POST | `/auth/signup` | No | Register new user: `{ username, password, displayName? }` → `{ token, user }` |
+| POST | `/auth/login` | No | Sign in: `{ username, password }` → `{ token, user }` |
+| GET | `/me` | Bearer | Get current user profile, favorites (`[Book]`), and wantToRead (`[Book]`) |
+| PUT | `/me/favorites` | Bearer | Update user favorite seeds: `{ isbns: [3..5] }` |
+| POST | `/me/want/:isbn` | Bearer | Add book to Want to Read shelf |
+| DELETE | `/me/want/:isbn` | Bearer | Remove book from Want to Read shelf |
+| GET | `/me/recommend` | Bearer | Personalized recommendations aggregated over all favorite books |
+
+### `GET /me/recommend`
+Query parameters:
+| Parameter | Default | Notes |
+|---|---|---|
+| `algo` | `hybrid` | `tfidf` \| `author` \| `publisher` \| `year` \| `hybrid` \| `all` |
+| `limit` | 12 | Number of recommendations |
+| `w_*` | defaults | Hybrid weight overrides |
+
+Response item includes per-seed contribution breakdown:
+```json
+{
+  "favorites": [ ... ],
+  "runs": [{
+    "algorithm": "hybrid",
+    "name": "Weighted Hybrid",
+    "meta": { "seeds": 3, "candidatesConsidered": 8138, "ms": 32.7 },
+    "results": [{
+      "book": { "isbn": "0441172695", "title": "Children of Dune", "author": "Frank Herbert", "...": "..." },
+      "score": 0.2981,
+      "features": { "title": 0.42, "author": 1, "publisher": 1, "year": 0.88 },
+      "bestSeed": "0441172660",
+      "contributions": { "0441172660": 0.89, "0671461494": 0.12 },
+      "matchedSeeds": 2
+    }]
+  }]
+}
+```
+
 ### Errors
 | Status | When |
 |---|---|
-| 400 | unknown `algo` |
-| 404 | ISBN not found |
-| 503 | engine index still building (first ~8 s after boot) |
-| 500 | unexpected error (`{ error }`) |
+| 400 | Invalid payload, unknown algorithm, or fewer than 3 favorites provided |
+| 401 | Not logged in, session expired, or bad credentials |
+| 404 | Book or ISBN not found |
+| 409 | Username already taken during signup |
+| 503 | In-memory engine index is still building on startup (~8 s) |
+| 500 | Unexpected internal server error |
+
