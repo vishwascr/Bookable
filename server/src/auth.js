@@ -9,7 +9,7 @@ export const signToken = (user) => jwt.sign({ sub: String(user._id), u: user.use
 
 // Requires "Authorization: Bearer <token>"; sets req.userId.
 export function requireAuth(req, res, next) {
-  const h = req.headers.authorization || '';
+  const h = typeof req.headers?.authorization === 'string' ? req.headers.authorization : '';
   const token = h.startsWith('Bearer ') ? h.slice(7) : null;
   if (!token) return res.status(401).json({ error: 'Not logged in' });
   try {
@@ -18,4 +18,17 @@ export function requireAuth(req, res, next) {
   } catch {
     res.status(401).json({ error: 'Session expired, please log in again' });
   }
+}
+
+// Optional auth: sets req.userId if a valid token is provided; proceeds as guest otherwise.
+export function optionalAuth(req, res, next) {
+  const h = typeof req.headers?.authorization === 'string' ? req.headers.authorization : '';
+  const token = h.startsWith('Bearer ') ? h.slice(7) : null;
+  if (!token) return next();
+  try {
+    req.userId = jwt.verify(token, JWT_SECRET).sub;
+  } catch {
+    req.userId = null;
+  }
+  next();
 }

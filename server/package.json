@@ -7,7 +7,9 @@
     "start": "node src/index.js",
     "dev": "node --watch src/index.js",
     "import": "node src/scripts/import.js",
-    "smoke": "node src/scripts/smoke.js"
+    "smoke": "node src/scripts/smoke.js",
+    "test": "node src/scripts/test-m1.js",
+    "test:m1": "node src/scripts/test-m1.js"
   },
   "keywords": [],
   "author": "",
