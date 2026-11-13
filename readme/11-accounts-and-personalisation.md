@@ -108,9 +108,9 @@ Example `/api/me/recommend` result item:
 ## Mascot Character & Design Specification
 The Bookable mascot is implemented directly as a scalable vector SVG, styled after the cartoon line art in `readme/tibbixel-dot-com-37658-svg.svg`:
 - **Format**: Pure SVG (`<svg viewBox="0 0 217 231">`) with responsive sizes (`sm`, `md`, `lg`) and standalone vector assets at `client/public/mascot.svg` and `client/src/assets/mascot.svg`.
-- **Character**: Friendly, bold-outline cartoon panda with cheek tufts, teardrop eye patches, shining eyes, and a sweet smile.
+- **Character**: Friendly, bold-outline cartoon panda with cheek tufts, teardrop eye patches, shining eyes, and a sweet smile; full white face with a clean rounded chin (no black neck/chin covering).
 - **Reading Glasses**: Round honey-gold wireframe glasses perched on the nose, framing the eyes with glass gleams.
-- **Book**: Holding an open orange book with clean, blank cream pages (no text printed on pages) using exact color **`#E88051`**.
+- **Book**: Held perpendicularly to the ground in front of the chest, displaying the solid orange **`#E88051`** **hard bind** (spine with embossed ribs and debossed cover borders) facing the user, with clean blank white page tops visible from above (no printed text).
 - **Bamboo**: Holding a fresh green bamboo stalk with segmented nodes and tender leaves in the other hand using exact color **`#145D3C`**.
 - **Cushion**: Sitting cross-legged comfortably atop a plush, tufted cushion using exact color **`#0B4D91`**.
 - **Placement**: Prominently featured on the **Login / Signup page (`AuthPage.jsx`)**, the **Logout confirmation page (`LogoutPage.jsx`)**, and the **Home landing hero (`App.jsx`)**.

@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { api, setToken } from '../api.js';
+import Mascot from './Mascot.jsx';
 
 export default function AuthPage({ mode: initialMode = 'login', onAuthed, onCancel }) {
   const [mode, setMode] = useState(initialMode);
@@ -28,12 +29,9 @@ export default function AuthPage({ mode: initialMode = 'login', onAuthed, onCanc
   return (
     <section className="auth-page">
       <form className="auth-card" onSubmit={submit}>
-        {/* Designated slot for upcoming mascot */}
-        <div className="mascot-slot" aria-label="Bookable Mascot Slot">
-          <div className="mascot-placeholder">
-            <span className="mascot-icon">🦉</span>
-            <span className="mascot-badge">Mascot Slot</span>
-          </div>
+        {/* Friendly Panda Mascot */}
+        <div className="mascot-slot" aria-label="Bookable Mascot">
+          <Mascot size="md" />
         </div>
 
         <div className="auth-branding">
