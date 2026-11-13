@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { api, getToken, setToken } from './api.js';
 import SearchBar from './components/SearchBar.jsx';
 import SearchResults from './components/SearchResults.jsx';
@@ -12,6 +12,9 @@ import LogoutPage from './components/LogoutPage.jsx';
 import Onboarding from './components/Onboarding.jsx';
 import ForYou from './components/ForYou.jsx';
 import Shelves from './components/Shelves.jsx';
+import SettingsPage from './components/SettingsPage.jsx';
+import ReviewModal from './components/ReviewModal.jsx';
+import BookDetailModal from './components/BookDetailModal.jsx';
 import Mascot from './components/Mascot.jsx';
 
 const SAMPLE_SEARCHES = [
@@ -25,7 +28,7 @@ const SAMPLE_SEARCHES = [
   'Agatha Christie',
 ];
 
-// Views: home | search | explore | login | signup | logout | onboarding | foryou | shelves
+// Views: home | search | explore | login | signup | logout | onboarding | foryou | shelves | settings
 export default function App() {
   const [algos, setAlgos] = useState([]);
   const [weights, setWeights] = useState(null);
@@ -37,7 +40,32 @@ export default function App() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [health, setHealth] = useState(null);
-  const [me, setMe] = useState(null); // { user, favorites, wantToRead }
+  const [me, setMe] = useState(null); // { user, favorites, wantToRead, currentlyReading, read, stats }
+
+  // Milestone 3 Modals State
+  const [reviewModalBook, setReviewModalBook] = useState(null);
+  const [existingReviewForModal, setExistingReviewForModal] = useState(null);
+  const [detailModalBook, setDetailModalBook] = useState(null);
+
+  // Computed shelf mapping for fast O(1) status lookup across book cards
+  const shelfMap = useMemo(() => {
+    if (!me?.user) return {};
+    const map = {};
+    for (const isbn of me.user.wantToRead || []) map[isbn] = 'want_to_read';
+    for (const isbn of me.user.currentlyReading || []) map[isbn] = 'currently_reading';
+    for (const isbn of me.user.read || []) map[isbn] = 'read';
+    return map;
+  }, [me]);
+
+  const totalShelved = useMemo(() => {
+    if (!me) return 0;
+    if (typeof me.stats?.totalShelved === 'number') return me.stats.totalShelved;
+    return (
+      (me.user?.wantToRead?.length || 0) +
+      (me.user?.currentlyReading?.length || 0) +
+      (me.user?.read?.length || 0)
+    );
+  }, [me]);
 
   const refreshMe = useCallback(async () => {
     if (!getToken()) {
@@ -129,17 +157,103 @@ export default function App() {
     setView(isNew || !m?.user?.onboarded ? 'onboarding' : 'foryou');
   };
 
-  const toggleWant = async (book, saved) => {
-    try {
-      if (saved) {
-        await api.removeWant(book.isbn);
-      } else {
-        await api.addWant(book.isbn);
+  const handleShelfChange = useCallback(
+    async (isbnOrBook, newStatus) => {
+      if (!getToken() || !me) {
+        setView('login');
+        return;
       }
-      await refreshMe();
-    } catch (e) {
-      setError(e.message);
-    }
+
+      const isbn = typeof isbnOrBook === 'object' && isbnOrBook !== null ? isbnOrBook.isbn : isbnOrBook;
+      const cleanIsbn = String(isbn || '').trim();
+      if (!cleanIsbn) return;
+
+      const prevMe = me;
+
+      // Optimistic state transition
+      setMe((prev) => {
+        if (!prev?.user) return prev;
+        const u = { ...prev.user };
+        const filterOut = (arr) => (arr || []).filter((i) => i !== cleanIsbn);
+
+        let nextWant = filterOut(u.wantToRead);
+        let nextCurrent = filterOut(u.currentlyReading);
+        let nextRead = filterOut(u.read);
+
+        if (newStatus === 'want_to_read') nextWant.unshift(cleanIsbn);
+        else if (newStatus === 'currently_reading') nextCurrent.unshift(cleanIsbn);
+        else if (newStatus === 'read') nextRead.unshift(cleanIsbn);
+
+        return {
+          ...prev,
+          user: {
+            ...u,
+            wantToRead: nextWant,
+            currentlyReading: nextCurrent,
+            read: nextRead,
+          },
+          stats: {
+            ...prev.stats,
+            wantToReadCount: nextWant.length,
+            currentlyReadingCount: nextCurrent.length,
+            readCount: nextRead.length,
+            totalShelved: nextWant.length + nextCurrent.length + nextRead.length,
+          },
+        };
+      });
+
+      try {
+        const res = await api.updateShelfStatus(cleanIsbn, newStatus);
+        if (res?.shelves) {
+          setMe((prev) => {
+            if (!prev?.user) return prev;
+            return {
+              ...prev,
+              user: {
+                ...prev.user,
+                wantToRead: res.shelves.wantToRead,
+                currentlyReading: res.shelves.currentlyReading,
+                read: res.shelves.read,
+              },
+              stats: {
+                ...prev.stats,
+                wantToReadCount: res.shelves.wantToRead.length,
+                currentlyReadingCount: res.shelves.currentlyReading.length,
+                readCount: res.shelves.read.length,
+                totalShelved:
+                  res.shelves.wantToRead.length +
+                  res.shelves.currentlyReading.length +
+                  res.shelves.read.length,
+              },
+            };
+          });
+        }
+        if (view === 'shelves') {
+          refreshMe();
+        }
+      } catch (err) {
+        setMe(prevMe);
+        setError(err.message || 'Failed to update shelf');
+      }
+    },
+    [me, view, refreshMe]
+  );
+
+  const handleOpenReview = (book, existingReview = null) => {
+    setReviewModalBook(book);
+    setExistingReviewForModal(existingReview);
+  };
+
+  const handleSelectBook = (book) => {
+    setDetailModalBook(book);
+  };
+
+  const handleReviewSaved = async () => {
+    await refreshMe();
+  };
+
+  const toggleWant = async (book, saved) => {
+    return handleShelfChange(book, saved ? 'none' : 'want_to_read');
   };
 
   const compare = algo === 'all';
@@ -176,7 +290,14 @@ export default function App() {
                 className={view === 'shelves' ? 'active' : ''}
                 onClick={() => setView('shelves')}
               >
-                My Books{me.wantToRead.length ? ` (${me.wantToRead.length})` : ''}
+                My Books{totalShelved > 0 ? ` (${totalShelved})` : ''}
+              </button>
+              <button
+                className={view === 'settings' ? 'active' : ''}
+                onClick={() => setView('settings')}
+                title="Account & Library Settings"
+              >
+                ⚙️ Settings
               </button>
               <span className="avatar" title={`Signed in as @${me.user.username}`}>
                 {(me.user.displayName || me.user.username).slice(0, 1).toUpperCase()}
@@ -312,17 +433,34 @@ export default function App() {
           setWeights={setWeights}
           onEditFavorites={() => setView('onboarding')}
           onExplore={explore}
-          onToggleWant={toggleWant}
+          onToggleWant={handleShelfChange}
+          shelfMap={shelfMap}
+          onShelfChange={handleShelfChange}
+          onRequireAuth={() => setView('login')}
+          onSelectBook={handleSelectBook}
         />
       )}
 
-      {/* VIEW: Shelves (Favorites & Want to Read) */}
+      {/* VIEW: Shelves (Overhauled 5 Tabs) */}
       {view === 'shelves' && me && (
         <Shelves
           me={me}
           onExplore={explore}
-          onToggleWant={toggleWant}
+          onSelectBook={handleSelectBook}
+          onOpenReview={handleOpenReview}
+          onStatusChange={handleShelfChange}
+          onShelfChange={handleShelfChange}
           onEditFavorites={() => setView('onboarding')}
+          onToggleWant={handleShelfChange}
+        />
+      )}
+
+      {/* VIEW: Settings Page */}
+      {view === 'settings' && me && (
+        <SettingsPage
+          me={me}
+          onRefreshMe={refreshMe}
+          onGoHome={goHome}
         />
       )}
 
@@ -332,6 +470,11 @@ export default function App() {
           query={searchQuery}
           onSelectSeed={explore}
           onClearSearch={goHome}
+          me={me}
+          shelfMap={shelfMap}
+          onShelfChange={handleShelfChange}
+          onRequireAuth={() => setView('login')}
+          onSelectBook={handleSelectBook}
         />
       )}
 
@@ -357,7 +500,15 @@ export default function App() {
 
           <div className="layout">
             <aside>
-              {data?.seed && <SeedPanel seed={data.seed} />}
+              {data?.seed && (
+                <SeedPanel
+                  seed={data.seed}
+                  me={me}
+                  shelfMap={shelfMap}
+                  onShelfChange={handleShelfChange}
+                  onRequireAuth={() => setView('login')}
+                />
+              )}
               {(algo === 'hybrid' || compare) && weights && (
                 <WeightSliders weights={weights} onChange={setWeights} />
               )}
@@ -372,8 +523,10 @@ export default function App() {
                       run={run}
                       compact={compare}
                       onPick={explore}
-                      wantSet={me ? new Set(me.user.wantToRead) : null}
-                      onToggleWant={me ? toggleWant : null}
+                      me={me}
+                      shelfMap={shelfMap}
+                      onShelfChange={handleShelfChange}
+                      onRequireAuth={() => setView('login')}
                     />
                   ))}
                 </div>
@@ -381,6 +534,32 @@ export default function App() {
             </main>
           </div>
         </>
+      )}
+
+      {/* Global Modals */}
+      {reviewModalBook && (
+        <ReviewModal
+          book={reviewModalBook}
+          existingReview={existingReviewForModal}
+          onClose={() => {
+            setReviewModalBook(null);
+            setExistingReviewForModal(null);
+          }}
+          onReviewSaved={handleReviewSaved}
+        />
+      )}
+
+      {detailModalBook && (
+        <BookDetailModal
+          book={detailModalBook}
+          me={me}
+          onClose={() => setDetailModalBook(null)}
+          onExplore={explore}
+          onSelectSeed={explore}
+          onOpenReview={handleOpenReview}
+          onStatusChange={handleShelfChange}
+          onShelfChange={handleShelfChange}
+        />
       )}
 
       <footer>

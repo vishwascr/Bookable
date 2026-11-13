@@ -1518,3 +1518,1433 @@ details summary {
   align-self: flex-start;
   font-size: .75rem;
 }
+
+/* ==========================================================================
+   Milestone 3: Universal ReadingStatusButton Component
+   ========================================================================== */
+
+.reading-status-container {
+  position: relative;
+  display: inline-flex;
+  vertical-align: middle;
+  font-family: inherit;
+}
+
+.status-btn-group {
+  display: inline-flex;
+  border-radius: 99px;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+.status-btn {
+  font-family: inherit;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease-in-out;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--line);
+  background: #ffffff;
+  color: var(--ok);
+  white-space: nowrap;
+}
+
+.status-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Sizes */
+.reading-status-container.sm .status-btn {
+  font-size: 0.75rem;
+  padding: 4px 10px;
+}
+.reading-status-container.sm .status-btn-dropdown-trigger {
+  padding: 4px 7px;
+}
+.reading-status-container.md .status-btn {
+  font-size: 0.85rem;
+  padding: 6px 14px;
+}
+.reading-status-container.md .status-btn-dropdown-trigger {
+  padding: 6px 9px;
+}
+.reading-status-container.lg .status-btn {
+  font-size: 0.95rem;
+  padding: 8px 18px;
+}
+.reading-status-container.lg .status-btn-dropdown-trigger {
+  padding: 8px 10px;
+}
+
+/* Split Button */
+.status-btn-main {
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
+  border-right: none;
+}
+.status-btn-dropdown-trigger {
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
+  border-left: 1px solid var(--line);
+  color: var(--muted);
+}
+.status-btn-main:hover,
+.status-btn-dropdown-trigger:hover {
+  background: #f8faf8;
+  border-color: var(--ok);
+}
+
+/* Active Status Pill */
+.status-btn-active {
+  border-radius: 99px;
+  gap: 6px;
+  background: #edf7f0;
+  border-color: var(--ok);
+  color: var(--ok);
+}
+.status-btn-active:hover {
+  background: #e2f2e6;
+}
+.status-btn-active.status-currently_reading {
+  background: #eef5fc;
+  border-color: #3b82f6;
+  color: #1d4ed8;
+}
+.status-btn-active.status-currently_reading:hover {
+  background: #e1effa;
+}
+.status-btn-active.status-read {
+  background: #f1f8ed;
+  border-color: #3b7e28;
+  color: #3b7e28;
+}
+.status-btn-active.status-read:hover {
+  background: #e6f3de;
+}
+
+.dropdown-arrow {
+  font-size: 0.75em;
+  opacity: 0.8;
+}
+
+/* Dropdown Menu */
+.reading-status-menu {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  min-width: 185px;
+  background: #ffffff;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.14);
+  padding: 6px 0;
+  margin: 0;
+  list-style: none;
+  z-index: 100;
+  animation: fadeInDown 0.15s ease-out;
+}
+
+@keyframes fadeInDown {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.status-menu-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 14px;
+  font-size: 0.88rem;
+  color: var(--ink);
+  cursor: pointer;
+  transition: background 0.12s;
+  user-select: none;
+}
+.status-menu-item:hover {
+  background: #f5f2ed;
+}
+.status-menu-item.selected {
+  font-weight: 600;
+  color: var(--ok);
+  background: #f0f7f2;
+}
+.status-item-icon {
+  width: 16px;
+  text-align: center;
+  font-weight: bold;
+}
+.status-menu-divider {
+  height: 1px;
+  background: var(--line);
+  margin: 4px 0;
+}
+.status-menu-item-remove {
+  color: #c93b27;
+}
+.status-menu-item-remove:hover {
+  background: #fdeee9;
+  color: #b02814;
+}
+
+/* Card action row alignment */
+.book-card-actions,
+.result-actions,
+.foryou-item-actions,
+.shelf-book-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 8px;
+  flex-wrap: wrap;
+}
+
+/* ==========================================================================
+   Milestone 3: Modals & iOS 20px Rounded Containers
+   ========================================================================== */
+
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  animation: fadeInModal 0.2s ease-out;
+}
+
+.modal-container {
+  background: #ffffff;
+  border-radius: 20px;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.2), 0 0 1px rgba(0, 0, 0, 0.1);
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+  border: 1px solid var(--line);
+  position: relative;
+  animation: scaleUpModal 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes fadeInModal {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes scaleUpModal {
+  from { transform: scale(0.96); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.modal-close-btn {
+  background: transparent;
+  border: none;
+  font-size: 1.25rem;
+  color: var(--muted);
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 8px;
+  transition: all 0.15s;
+}
+
+.modal-close-btn:hover:not(:disabled) {
+  background: #f0ebe4;
+  color: var(--ink);
+}
+
+.modal-badge {
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--accent);
+  background: rgba(181, 86, 43, 0.1);
+  padding: 3px 10px;
+  border-radius: 99px;
+}
+
+/* ==========================================================================
+   Milestone 3: Review Modal
+   ========================================================================== */
+
+.review-modal {
+  max-width: 520px;
+  padding: 28px;
+}
+
+.modal-book-snippet {
+  display: flex;
+  gap: 14px;
+  align-items: center;
+  background: var(--bg);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 12px 14px;
+  margin-bottom: 20px;
+}
+
+.modal-book-meta {
+  flex: 1;
+}
+
+.modal-book-title {
+  font-weight: 700;
+  font-size: 0.95rem;
+  line-height: 1.3;
+  color: var(--ink);
+}
+
+.modal-book-author {
+  font-size: 0.85rem;
+  color: var(--muted);
+  margin-top: 2px;
+}
+
+.modal-book-year {
+  font-size: 0.75rem;
+  color: var(--muted);
+}
+
+.review-form {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.rating-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.field-label {
+  font-weight: 600;
+  font-size: 0.9rem;
+  color: var(--ink);
+}
+
+.req {
+  color: #dc2626;
+}
+
+.star-picker {
+  display: flex;
+  gap: 6px;
+  margin: 4px 0;
+}
+
+.star-btn {
+  background: transparent;
+  border: none;
+  font-size: 2.2rem;
+  line-height: 1;
+  cursor: pointer;
+  padding: 2px;
+  color: #d8d4cf;
+  transition: transform 0.1s ease, color 0.1s ease;
+}
+
+.star-btn.filled {
+  color: #f5a623;
+}
+
+.star-btn:hover {
+  transform: scale(1.15);
+}
+
+.rating-helper-text {
+  font-size: 0.88rem;
+  font-weight: 500;
+  color: var(--muted);
+  min-height: 1.2rem;
+}
+
+.textarea-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.textarea-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+}
+
+.char-counter {
+  font-size: 0.78rem;
+  color: var(--muted);
+  font-family: ui-monospace, Menlo, monospace;
+}
+
+.char-counter.warn {
+  color: #dc2626;
+  font-weight: 700;
+}
+
+.textarea-field textarea {
+  width: 100%;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 12px 14px;
+  font-family: inherit;
+  font-size: 0.92rem;
+  line-height: 1.45;
+  resize: vertical;
+  background: #fff;
+  transition: border-color 0.15s ease;
+  box-sizing: border-box;
+}
+
+.textarea-field textarea:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+.shelf-notice {
+  font-size: 0.85rem;
+  color: var(--muted);
+  background: #f7faf8;
+  border: 1px solid #dceede;
+  border-radius: 10px;
+  padding: 8px 12px;
+  line-height: 1.4;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 8px;
+  gap: 12px;
+}
+
+.delete-group {
+  display: flex;
+  align-items: center;
+}
+
+.confirm-delete-box {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.82rem;
+  color: #991b1b;
+}
+
+.btn-delete-link {
+  background: transparent;
+  border: none;
+  color: #dc2626;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 6px 0;
+}
+
+.btn-delete-link:hover {
+  text-decoration: underline;
+}
+
+.submit-group {
+  display: flex;
+  gap: 10px;
+  margin-left: auto;
+}
+
+/* ==========================================================================
+   Milestone 3: Book Detail Modal
+   ========================================================================== */
+
+.detail-modal {
+  max-width: 720px;
+  padding: 28px;
+}
+
+.detail-hero {
+  display: flex;
+  gap: 24px;
+  margin-bottom: 20px;
+}
+
+.detail-cover-col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  flex-shrink: 0;
+}
+
+.detail-info-col {
+  flex: 1;
+}
+
+.detail-title {
+  font-family: Georgia, serif;
+  font-size: 1.6rem;
+  line-height: 1.25;
+  margin: 0 0 6px;
+  color: var(--ink);
+}
+
+.detail-author {
+  font-size: 1rem;
+  color: var(--muted);
+  margin-bottom: 14px;
+}
+
+.detail-meta-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  background: var(--bg);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 12px 14px;
+  margin-bottom: 18px;
+}
+
+.meta-item {
+  display: flex;
+  flex-direction: column;
+}
+
+.meta-label {
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  color: var(--muted);
+  letter-spacing: 0.5px;
+  font-weight: 600;
+}
+
+.meta-value {
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--ink);
+  margin-top: 2px;
+}
+
+.btn-explore-seed {
+  background: #fdf5f0;
+  border: 1px solid rgba(181, 86, 43, 0.3);
+  color: var(--accent);
+  padding: 8px 14px;
+  border-radius: 12px;
+  font-size: 0.88rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.btn-explore-seed:hover {
+  background: #faece3;
+}
+
+.detail-divider {
+  border: none;
+  border-top: 1px solid var(--line);
+  margin: 20px 0;
+}
+
+/* Rating Overview & Histogram */
+.rating-overview-card {
+  display: flex;
+  gap: 28px;
+  background: var(--bg);
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  padding: 18px 24px;
+  margin: 12px 0 24px;
+  align-items: center;
+}
+
+.rating-score-block {
+  text-align: center;
+  min-width: 110px;
+}
+
+.big-avg {
+  font-size: 2.8rem;
+  font-weight: 800;
+  line-height: 1;
+  color: var(--ink);
+}
+
+.stars-display {
+  margin: 6px 0 4px;
+  font-size: 1.1rem;
+}
+
+.star-gold {
+  color: #f5a623;
+}
+
+.star-muted {
+  color: #d8d4cf;
+}
+
+.total-ratings-count {
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+
+.rating-histogram {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.hist-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 0.8rem;
+}
+
+.hist-label {
+  min-width: 32px;
+  font-weight: 600;
+  color: var(--muted);
+}
+
+.hist-bar-track {
+  flex: 1;
+  height: 8px;
+  background: #e5ded4;
+  border-radius: 99px;
+  overflow: hidden;
+}
+
+.hist-bar-fill {
+  height: 100%;
+  background: #f5a623;
+  border-radius: 99px;
+  transition: width 0.3s ease;
+}
+
+.hist-count {
+  min-width: 24px;
+  text-align: right;
+  color: var(--muted);
+  font-size: 0.75rem;
+}
+
+/* User's Review Section */
+.user-review-section {
+  margin-bottom: 24px;
+}
+
+.user-review-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.user-review-card {
+  background: #fdfcf9;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  padding: 16px;
+}
+
+.user-review-meta {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+
+.user-stars {
+  color: #f5a623;
+  font-size: 1.1rem;
+  letter-spacing: 1px;
+}
+
+.review-date {
+  font-size: 0.78rem;
+  color: var(--muted);
+}
+
+.review-body-text {
+  font-size: 0.92rem;
+  line-height: 1.5;
+  color: var(--ink);
+  margin: 0 0 10px;
+}
+
+.review-empty-text {
+  font-size: 0.85rem;
+  color: var(--muted);
+  margin: 0;
+}
+
+.sentiment-badge {
+  display: inline-block;
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 99px;
+  text-transform: capitalize;
+}
+
+.sentiment-badge.positive {
+  background: #e6f7ec;
+  color: #1b6b37;
+  border: 1px solid #b8e8c8;
+}
+
+.sentiment-badge.neutral {
+  background: #fdf6e2;
+  color: #8a6d1c;
+  border: 1px solid #f5e4a8;
+}
+
+.sentiment-badge.negative {
+  background: #fde8e8;
+  color: #9c2828;
+  border: 1px solid #f7c2c2;
+}
+
+.sentiment-keywords {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.kw-pill {
+  font-size: 0.75rem;
+  background: #efece6;
+  color: var(--ink);
+  padding: 2px 7px;
+  border-radius: 6px;
+  font-family: ui-monospace, Menlo, monospace;
+}
+
+.kw-pill.sm {
+  font-size: 0.7rem;
+  padding: 1px 5px;
+}
+
+.write-review-prompt-card {
+  background: #fff8f5;
+  border: 1px dashed var(--accent);
+  border-radius: 14px;
+  padding: 14px 18px;
+  text-align: center;
+}
+
+.write-review-prompt-card p {
+  margin: 0;
+  font-size: 0.9rem;
+  color: var(--ink);
+}
+
+/* Community Reviews List */
+.community-reviews-section h3 {
+  margin: 0 0 12px;
+}
+
+.empty-reviews-state {
+  background: var(--bg);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 20px;
+  text-align: center;
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+.reviews-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.review-item-card {
+  background: #ffffff;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  padding: 16px;
+}
+
+.review-item-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.reviewer-info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.reviewer-avatar {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: var(--accent);
+  color: #fff;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.9rem;
+}
+
+.reviewer-name {
+  font-weight: 600;
+  font-size: 0.88rem;
+  color: var(--ink);
+  line-height: 1.2;
+}
+
+.reviewer-handle {
+  font-size: 0.75rem;
+  color: var(--muted);
+}
+
+.review-item-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.review-item-stars {
+  color: #f5a623;
+  font-size: 0.95rem;
+}
+
+.review-item-date {
+  font-size: 0.75rem;
+  color: var(--muted);
+}
+
+.review-text-content {
+  font-size: 0.9rem;
+  line-height: 1.5;
+  color: var(--ink);
+  margin: 0 0 8px;
+}
+
+.review-keywords {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+/* ==========================================================================
+   Milestone 3: Overhauled 5-Tab Shelves View
+   ========================================================================== */
+
+.shelves-view {
+  width: 100%;
+}
+
+.shelves-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 14px;
+  margin-bottom: 16px;
+}
+
+.shelves-title-group {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+}
+
+.shelves-title-group h2 {
+  margin: 0;
+  font-family: Georgia, serif;
+}
+
+.shelves-total-badge {
+  font-size: 0.85rem;
+  color: var(--muted);
+  font-weight: 500;
+}
+
+.shelves-filter-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.shelves-filter-input {
+  background: #ffffff;
+  border: 1px solid var(--line);
+  border-radius: 99px;
+  padding: 8px 32px 8px 14px;
+  font-size: 0.85rem;
+  font-family: inherit;
+  width: 250px;
+  transition: all 0.15s ease;
+}
+
+.shelves-filter-input:focus {
+  outline: none;
+  border-color: var(--accent);
+  width: 290px;
+}
+
+.clear-filter-btn {
+  position: absolute;
+  right: 10px;
+  background: transparent;
+  border: none;
+  font-size: 0.8rem;
+  color: var(--muted);
+  cursor: pointer;
+  padding: 2px 4px;
+}
+
+/* 5-Tab Segmented Navigation */
+.shelf-tabs-nav {
+  display: flex;
+  gap: 6px;
+  overflow-x: auto;
+  padding: 4px;
+  background: #e9e3da;
+  border-radius: 14px;
+  margin: 0 0 20px;
+}
+
+.shelf-tab-btn {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 9px 12px;
+  border: none;
+  background: transparent;
+  border-radius: 10px;
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--muted);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.15s ease;
+}
+
+.shelf-tab-btn.active {
+  background: #ffffff;
+  color: var(--ink);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+}
+
+.tab-count-badge {
+  background: rgba(0, 0, 0, 0.08);
+  font-size: 0.75rem;
+  padding: 2px 7px;
+  border-radius: 99px;
+  font-weight: 700;
+}
+
+.shelf-tab-btn.active .tab-count-badge {
+  background: var(--accent);
+  color: #ffffff;
+}
+
+.fav-strip-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #fff8f4;
+  border: 1px solid rgba(181, 86, 43, 0.2);
+  border-radius: 14px;
+  padding: 12px 18px;
+  margin-bottom: 20px;
+}
+
+.fav-strip-header p {
+  margin: 0;
+  font-size: 0.88rem;
+}
+
+.shelf-empty-state {
+  text-align: center;
+  padding: 48px 24px;
+  border-radius: 20px;
+  background: #ffffff;
+}
+
+.empty-icon {
+  font-size: 2.8rem;
+  margin-bottom: 10px;
+}
+
+.shelf-empty-state h3 {
+  margin: 0 0 6px;
+}
+
+.shelf-empty-state p {
+  color: var(--muted);
+  margin: 0 0 16px;
+}
+
+/* Shelf Book Cards (iOS 20px Rounded Containers) */
+.shelf-book-card {
+  border-radius: 20px;
+  background: #ffffff;
+  border: 1px solid var(--line);
+  padding: 16px;
+  display: flex;
+  gap: 16px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  cursor: pointer;
+  position: relative;
+}
+
+.shelf-book-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.06);
+}
+
+.card-cover-wrap {
+  position: relative;
+  flex-shrink: 0;
+}
+
+.fav-badge {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  background: #ffffff;
+  border-radius: 50%;
+  padding: 2px;
+  font-size: 0.9rem;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+}
+
+.card-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.card-title {
+  margin: 0 0 4px;
+  font-size: 1rem;
+  line-height: 1.3;
+  color: var(--ink);
+  cursor: pointer;
+}
+
+.card-title:hover {
+  color: var(--accent);
+}
+
+.card-author {
+  font-size: 0.85rem;
+  color: var(--muted);
+  margin-bottom: 4px;
+}
+
+.card-meta {
+  font-size: 0.78rem;
+  color: var(--muted);
+  margin-bottom: 10px;
+}
+
+.card-shelf-action {
+  margin-bottom: 8px;
+}
+
+.card-rating-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.shelf-star-picker {
+  display: flex;
+  gap: 2px;
+}
+
+.star-shelf-btn {
+  background: transparent;
+  border: none;
+  font-size: 1.15rem;
+  color: #d8d4cf;
+  cursor: pointer;
+  padding: 0;
+  transition: transform 0.1s;
+}
+
+.star-shelf-btn.active {
+  color: #f5a623;
+}
+
+.star-shelf-btn:hover {
+  transform: scale(1.2);
+}
+
+.user-rating-num {
+  font-size: 0.78rem;
+  color: var(--muted);
+}
+
+.card-review-btn-wrap {
+  margin-top: auto;
+}
+
+.btn-review-status {
+  background: transparent;
+  border: 1px solid var(--line);
+  color: var(--ink);
+  font-size: 0.78rem;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.btn-review-status:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+  background: #fdf6f2;
+}
+
+.btn-review-status.reviewed {
+  border-color: #ceead6;
+  color: #137333;
+  background: #f1f9f3;
+}
+
+/* ==========================================================================
+   Milestone 3: Settings Page & Confirmation Modals
+   ========================================================================== */
+
+.settings-page {
+  max-width: 840px;
+  margin: 0 auto;
+  padding: 12px 0 40px;
+  width: 100%;
+}
+
+.settings-header {
+  margin-bottom: 24px;
+}
+
+.settings-header h2 {
+  font-family: Georgia, serif;
+  font-size: 1.8rem;
+  margin: 0 0 6px 0;
+}
+
+.settings-card {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  padding: 24px;
+  margin-bottom: 24px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.03);
+}
+
+.settings-card h3 {
+  margin: 0 0 8px 0;
+  font-size: 1.25rem;
+}
+
+.section-desc {
+  color: var(--muted);
+  font-size: 0.9rem;
+  margin: 0 0 16px 0;
+}
+
+/* Profile Card */
+.settings-profile {
+  display: flex;
+  gap: 20px;
+  align-items: center;
+}
+
+.settings-avatar {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  background: var(--accent);
+  color: #fff;
+  font-size: 2.2rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 14px rgba(181, 86, 43, 0.25);
+  flex-shrink: 0;
+}
+
+.settings-info {
+  flex: 1;
+}
+
+.settings-info h3 {
+  margin: 0 0 4px 0;
+  font-size: 1.4rem;
+}
+
+.settings-username {
+  color: var(--muted);
+  font-size: 0.95rem;
+  margin: 0 0 6px 0;
+}
+
+.settings-joined {
+  color: var(--muted);
+  font-size: 0.85rem;
+  margin: 0 0 8px 0;
+}
+
+.settings-badges {
+  display: flex;
+  gap: 8px;
+}
+
+.status-badge {
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 3px 10px;
+  border-radius: 99px;
+  display: inline-block;
+}
+
+.status-badge.onboarded {
+  background: #e6f4ea;
+  color: #137333;
+  border: 1px solid #ceead6;
+}
+
+.status-badge.pending {
+  background: #fef7e0;
+  color: #b06000;
+  border: 1px solid #feefc3;
+}
+
+/* Statistics Grid */
+.settings-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 12px;
+}
+
+.stat-box {
+  background: var(--bg);
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  padding: 16px 10px;
+  text-align: center;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.stat-box:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.stat-icon {
+  font-size: 1.4rem;
+  margin-bottom: 4px;
+}
+
+.stat-value {
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: var(--ink);
+  line-height: 1.2;
+}
+
+.stat-label {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--muted);
+  font-weight: 600;
+  margin-top: 4px;
+}
+
+/* Danger Zone */
+.settings-card.danger-zone {
+  border-color: #f8c2b6;
+  background: #fffafa;
+}
+
+.danger-title {
+  color: #b52b2b !important;
+}
+
+.danger-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 18px 0;
+  border-bottom: 1px solid #fde8e4;
+  gap: 20px;
+}
+
+.danger-item:last-child {
+  border-bottom: none;
+  padding-bottom: 4px;
+}
+
+.danger-desc h4 {
+  margin: 0 0 6px 0;
+  font-size: 1.05rem;
+  color: var(--ink);
+}
+
+.danger-desc p {
+  margin: 0;
+  font-size: 0.88rem;
+  color: var(--muted);
+  line-height: 1.45;
+}
+
+.btn-danger-outline {
+  border: 1.5px solid #dc2626;
+  color: #dc2626;
+  background: #fff;
+  padding: 10px 18px;
+  border-radius: 12px;
+  font-weight: 600;
+  font-size: 0.9rem;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+}
+
+.btn-danger-outline:hover {
+  background: #fee2e2;
+  border-color: #b91c1c;
+  color: #b91c1c;
+}
+
+.modal-reassurance-box {
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  border-radius: 12px;
+  padding: 12px 14px;
+  margin: 14px 0;
+  font-size: 0.88rem;
+  color: #166534;
+  line-height: 1.4;
+}
+
+.modal-alert-box {
+  background: #fff5f5;
+  border: 1px solid #fed7d7;
+  border-radius: 12px;
+  padding: 12px 14px;
+  margin: 14px 0;
+  font-size: 0.88rem;
+  color: #991b1b;
+  line-height: 1.4;
+}
+
+.modal-error-alert {
+  background: #fef2f2;
+  border: 1px solid #f87171;
+  color: #b91c1c;
+  padding: 10px 14px;
+  border-radius: 10px;
+  margin-top: 12px;
+  font-size: 0.88rem;
+}
+
+.btn-danger {
+  background: #dc2626;
+  color: #fff;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 12px;
+  font-weight: 600;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.btn-danger:hover:not(:disabled) {
+  background: #b91c1c;
+}
+
+.btn-danger:disabled,
+.btn-secondary:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.btn-secondary {
+  background: #f3f4f6;
+  color: #374151;
+  border: 1px solid #d1d5db;
+  padding: 10px 18px;
+  border-radius: 12px;
+  font-weight: 500;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.btn-secondary.sm {
+  padding: 6px 12px;
+  font-size: 0.85rem;
+  border-radius: 8px;
+}
+
+.btn-secondary:hover:not(:disabled) {
+  background: #e5e7eb;
+}
+
+/* Toast Notifications */
+.settings-toast-success {
+  background: #dcfce7;
+  color: #166534;
+  border: 1px solid #86efac;
+  border-radius: 14px;
+  padding: 12px 16px;
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  box-shadow: 0 4px 12px rgba(22, 101, 52, 0.08);
+  font-weight: 500;
+  font-size: 0.92rem;
+}
+
+.toast-dismiss-btn {
+  background: transparent;
+  border: none;
+  font-size: 1rem;
+  color: #166534;
+  cursor: pointer;
+  padding: 2px 6px;
+  border-radius: 6px;
+}

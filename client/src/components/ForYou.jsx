@@ -4,13 +4,26 @@ import Cover from './Cover.jsx';
 import AlgorithmPicker from './AlgorithmPicker.jsx';
 import WeightSliders, { FEATURE_LABELS } from './WeightSliders.jsx';
 import HowItWorks from './HowItWorks.jsx';
+import ReadingStatusButton from './ReadingStatusButton.jsx';
 
 function Bar({ value, cls = '' }) {
   return <div className={`bar ${cls}`}><div style={{ width: `${Math.max(0, Math.min(1, value)) * 100}%` }} /></div>;
 }
 
 // Personalised home page: recommendations aggregated over the user's favourite books.
-export default function ForYou({ me, algos, weights, setWeights, onEditFavorites, onExplore, onToggleWant }) {
+export default function ForYou({
+  me,
+  algos,
+  weights,
+  setWeights,
+  onEditFavorites,
+  onExplore,
+  onToggleWant,
+  shelfMap = null,
+  onShelfChange = null,
+  onRequireAuth = null,
+  onSelectBook = null,
+}) {
   const [algo, setAlgo] = useState('hybrid');
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -95,7 +108,13 @@ export default function ForYou({ me, algos, weights, setWeights, onEditFavorites
                           <span className="rank">{i + 1}</span>
                           <Cover src={r.book.imageM} size={compare ? 'sm' : 'md'} title={r.book.title} />
                           <div className="info">
-                            <div className="t clickable" onClick={() => onExplore(r.book)} title="Explore similar books">{r.book.title}</div>
+                            <div
+                              className="t clickable"
+                              onClick={() => (onSelectBook ? onSelectBook(r.book) : onExplore(r.book))}
+                              title="View details or explore similar books"
+                            >
+                              {r.book.title}
+                            </div>
                             <div className="m">{r.book.author} · {r.book.year || 'n/a'}</div>
                             <div className="because">
                               Because you liked {liked.map((b) => <i key={b.isbn}>{b.title.split(/[:(]/)[0].trim()}</i>).reduce((a, el, k) => (k ? [...a, ', ', el] : [el]), [])}
@@ -117,9 +136,17 @@ export default function ForYou({ me, algos, weights, setWeights, onEditFavorites
                                 </details>
                               </div>
                             )}
-                            <button className={`want-btn ${saved ? 'saved' : ''}`} onClick={() => onToggleWant(r.book, saved)}>
-                              {saved ? '✓ Want to Read' : '+ Want to Read'}
-                            </button>
+                            <div className="foryou-item-actions" onClick={(e) => e.stopPropagation()}>
+                              <ReadingStatusButton
+                                book={r.book}
+                                isbn={r.book.isbn}
+                                status={shelfMap?.[r.book.isbn] || (saved ? 'want_to_read' : 'none')}
+                                me={me}
+                                onStatusChange={onShelfChange || onToggleWant}
+                                onRequireAuth={onRequireAuth}
+                                size="sm"
+                              />
+                            </div>
                           </div>
                         </li>
                       );

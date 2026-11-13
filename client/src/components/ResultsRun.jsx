@@ -1,11 +1,20 @@
 import Cover from './Cover.jsx';
 import { FEATURE_LABELS } from './WeightSliders.jsx';
+import ReadingStatusButton from './ReadingStatusButton.jsx';
 
 function Bar({ value, cls = '' }) {
   return <div className={`bar ${cls}`}><div style={{ width: `${Math.max(0, Math.min(1, value)) * 100}%` }} /></div>;
 }
 
-export default function ResultsRun({ run, compact, onPick }) {
+export default function ResultsRun({
+  run,
+  compact,
+  onPick,
+  me = null,
+  shelfMap = null,
+  onShelfChange = null,
+  onRequireAuth = null,
+}) {
   return (
     <section className="run">
       <div className="run-head">
@@ -36,6 +45,17 @@ export default function ResultsRun({ run, compact, onPick }) {
                   ))}
                 </div>
               )}
+              <div className="result-actions" onClick={(e) => e.stopPropagation()}>
+                <ReadingStatusButton
+                  book={r.book}
+                  isbn={r.book.isbn}
+                  status={shelfMap?.[r.book.isbn]}
+                  me={me}
+                  onStatusChange={onShelfChange}
+                  onRequireAuth={onRequireAuth}
+                  size={compact ? 'sm' : 'md'}
+                />
+              </div>
             </div>
           </li>
         ))}

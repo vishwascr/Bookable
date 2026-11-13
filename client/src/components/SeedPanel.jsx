@@ -1,6 +1,13 @@
 import Cover from './Cover.jsx';
+import ReadingStatusButton from './ReadingStatusButton.jsx';
 
-export default function SeedPanel({ seed }) {
+export default function SeedPanel({
+  seed,
+  me = null,
+  shelfMap = null,
+  onShelfChange = null,
+  onRequireAuth = null,
+}) {
   const { book, terms } = seed;
   return (
     <section className="card seed">
@@ -12,6 +19,17 @@ export default function SeedPanel({ seed }) {
           <div className="m">{book.author}</div>
           <div className="m">{book.year || 'n/a'} · {book.publisher}</div>
           <div className="m mono">ISBN {book.isbn}</div>
+          <div className="seed-actions" style={{ marginTop: '10px' }} onClick={(e) => e.stopPropagation()}>
+            <ReadingStatusButton
+              book={book}
+              isbn={book.isbn}
+              status={shelfMap?.[book.isbn]}
+              me={me}
+              onStatusChange={onShelfChange}
+              onRequireAuth={onRequireAuth}
+              size="sm"
+            />
+          </div>
         </div>
       </div>
       <h4>TF-IDF title terms</h4>

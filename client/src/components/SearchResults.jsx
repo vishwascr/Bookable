@@ -1,10 +1,20 @@
 import { useEffect, useState } from 'react';
 import { api } from '../api.js';
 import Cover from './Cover.jsx';
+import ReadingStatusButton from './ReadingStatusButton.jsx';
 
 const PAGE_SIZE = 24;
 
-export default function SearchResults({ query, onSelectSeed, onClearSearch }) {
+export default function SearchResults({
+  query,
+  onSelectSeed,
+  onClearSearch,
+  me = null,
+  shelfMap = null,
+  onShelfChange = null,
+  onRequireAuth = null,
+  onSelectBook = null,
+}) {
   const [data, setData] = useState({ books: [], total: 0, page: 1, totalPages: 0 });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -94,7 +104,11 @@ export default function SearchResults({ query, onSelectSeed, onClearSearch }) {
         <>
           <div className="search-results-grid">
             {data.books.map((b) => (
-              <article key={b.isbn} className="book-search-card" onClick={() => onSelectSeed(b)}>
+              <article
+                key={b.isbn}
+                className="book-search-card"
+                onClick={() => (onSelectBook ? onSelectBook(b) : onSelectSeed(b))}
+              >
                 <Cover src={b.imageM} size="md" title={b.title} />
                 <div className="book-card-body">
                   <h3 className="book-card-title" title={b.title}>
@@ -111,16 +125,27 @@ export default function SearchResults({ query, onSelectSeed, onClearSearch }) {
                     )}
                   </div>
                   <div className="book-card-isbn mono">ISBN {b.isbn}</div>
-                  <button
-                    type="button"
-                    className="select-seed-btn"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      onSelectSeed(b);
-                    }}
-                  >
-                    ✨ Get Recommendations →
-                  </button>
+                  <div className="book-card-actions" onClick={(e) => e.stopPropagation()}>
+                    <ReadingStatusButton
+                      book={b}
+                      isbn={b.isbn}
+                      status={shelfMap?.[b.isbn]}
+                      me={me}
+                      onStatusChange={onShelfChange}
+                      onRequireAuth={onRequireAuth}
+                      size="sm"
+                    />
+                    <button
+                      type="button"
+                      className="select-seed-btn"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onSelectSeed(b);
+                      }}
+                    >
+                      ✨ Get Recommendations →
+                    </button>
+                  </div>
                 </div>
               </article>
             ))}

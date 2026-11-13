@@ -57,5 +57,22 @@ export const api = {
   removeWant: (isbn) => j(`/api/me/want/${isbn}`, { method: 'DELETE' }),
   forYou: (algo, weights, limit = 12) =>
     j(`/api/me/recommend?${weightParams(new URLSearchParams({ algo, limit }), weights)}`),
+
+  // Shelves & Reading Status (M3)
+  updateShelfStatus: (isbn, status) =>
+    j(`/api/me/shelf/${isbn}`, { method: 'PUT', body: { status } }),
+  updateReadingStatus: (isbn, status) =>
+    j(`/api/me/shelf/${isbn}`, { method: 'PUT', body: { status } }),
+  getShelves: () => j('/api/me/shelves'),
+  resetBooks: () => j('/api/me/reset-books', { method: 'POST' }),
+
+  // Book Reviews & Ratings (M3)
+  getBookReviews: (isbn) => j(`/api/books/${isbn}/reviews`),
+  submitReview: (isbn, body) =>
+    j(`/api/books/${isbn}/reviews`, { method: 'POST', body }),
+  deleteReview: (reviewId) =>
+    j(`/api/reviews/${reviewId}`, { method: 'DELETE' }),
+  getMyReviews: () => j('/api/me/reviews'),
+  deleteAllReviews: () => j('/api/me/reviews', { method: 'DELETE' }),
 };
 
