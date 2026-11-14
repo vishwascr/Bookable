@@ -1,0 +1,42 @@
+--- a/server/src/scripts/test-api-m2.js
++++ b/server/src/scripts/test-api-m2.js
+@@ -160,5 +160,40 @@
+   assert.equal(res.data.diagnostics.adaptationStrategy, 'negative_contrast');
+   assert.equal(res.data.diagnostics.titleExcluded, true);
++  console.log('  ✅ POST /recommend/sentiment-adapted negative review passed.');
++}
++
++// Test 7: POST /recommend/sentiment-adapted - Double Negation ("not without merit")
++{
++  const payload = {
++    reviewText: 'It is not without merit, and possesses genuine literary depth.',
++    targetIsbn: '0439136350',
++    rating: 4,
++    limit: 4,
++  };
++  const res = await dispatch('POST', '/recommend/sentiment-adapted', payload);
++  assert.equal(res.status, 200);
++  assert.equal(res.data.sentiment.label, 'positive');
++  assert(res.data.sentiment.score > 0.0);
++  assert.equal(res.data.diagnostics.adaptationStrategy, 'positive_reinforce');
++  console.log('  ✅ POST /recommend/sentiment-adapted double negation passed.');
++}
++
++// Test 8: POST /recommend/sentiment-adapted - Aspect Pacing Discrimination ("slow-burn")
++{
++  const payload = {
++    reviewText: 'A wonderful slow-burn romance with compelling characters and rich world.',
++    targetIsbn: '0439136350',
++    rating: 5,
++    limit: 4,
++  };
++  const res = await dispatch('POST', '/recommend/sentiment-adapted', payload);
++  assert.equal(res.status, 200);
++  assert.equal(res.data.sentiment.label, 'positive');
++  assert(res.data.sentiment.aspects.includes('slow-burn'), 'Must include slow-burn aspect');
++  assert(!res.data.sentiment.aspects.includes('slow-dragging'), 'slow-burn must NOT trigger slow-dragging aspect');
++  assert.equal(res.data.diagnostics.adaptationStrategy, 'positive_reinforce');
++  console.log('  ✅ POST /recommend/sentiment-adapted aspect pacing isolation passed.');
+ }
+ 
+ console.log('\n🎉 ALL API ROUTE INTEGRATION TESTS PASSED SUCCESSFULLY!');

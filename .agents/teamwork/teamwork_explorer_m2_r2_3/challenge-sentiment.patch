@@ -1,0 +1,85 @@
+--- a/server/src/scripts/challenge-sentiment.js
++++ b/server/src/scripts/challenge-sentiment.js
+@@ -180,6 +180,64 @@
+   );
+ }
+ 
++// 1.12 Double Negation with alternative positive term ("charm")
++{
++  const text = 'It is not without charm.';
++  const res = analyzeReviewSentiment(text);
++  const pass = res.polarity > 0.0;
++  recordTest(
++    'Double Negation: "It is not without charm." -> assert polarity > 0',
++    pass,
++    `Expected polarity > 0.0, observed: ${res.polarity} (label: "${res.label}")`
++  );
++}
++
++// 1.13 Aspect Pacing Separation: "slow-burn" must NOT trigger "slow-dragging"
++{
++  const text = 'A wonderful slow-burn romance with compelling characters.';
++  const res = analyzeReviewSentiment(text, 5);
++  const hasSlowBurn = res.aspects.includes('slow-burn');
++  const hasSlowDragging = res.aspects.includes('slow-dragging');
++  const pass = hasSlowBurn && !hasSlowDragging && res.aspectBreakdown['slow-burn'] === 'positive';
++  recordTest(
++    'Aspect Pacing Separation: "slow-burn" must NOT trigger "slow-dragging"',
++    pass,
++    `aspects: ${JSON.stringify(res.aspects)}, slow-burn present: ${hasSlowBurn}, slow-dragging present: ${hasSlowDragging}`
++  );
++}
++
++// 1.14 Aspect Word Boundary Substring Protection: "explored" & "upsetting" must NOT trigger "world-building"
++{
++  const resExplored = analyzeReviewSentiment('She explored the quiet streets of the city.', 4);
++  const resUpsetting = analyzeReviewSentiment('An upsetting and distressing tragedy.', 2);
++  const resSetting = analyzeReviewSentiment('She explores the rich setting and vast universe.', 5);
++  const resLore = analyzeReviewSentiment('Rich lore and magnificent mythology.', 5);
++
++  const noFalseLore = !resExplored.aspects.includes('world-building');
++  const noFalseSetting = !resUpsetting.aspects.includes('world-building');
++  const hasTrueSetting = resSetting.aspects.includes('world-building');
++  const hasTrueLore = resLore.aspects.includes('world-building');
++
++  const pass = noFalseLore && noFalseSetting && hasTrueSetting && hasTrueLore;
++  recordTest(
++    'Aspect Word Boundary Protection: "explored" & "upsetting" must NOT trigger "world-building"',
++    pass,
++    `explored has lore: ${!noFalseLore}, upsetting has setting: ${!noFalseSetting}, valid setting: ${hasTrueSetting}, valid lore: ${hasTrueLore}`
++  );
++}
++
+ // ===========================================================================
+ // SECTION 2: Star Calibration Sensitivity
+ // ===========================================================================
+@@ -406,6 +464,28 @@
+   );
+ }
+ 
++// ===========================================================================
++// SECTION 5: Review Route Module Contract Verification
++// ===========================================================================
++console.log('\n--- SECTION 5: Review Route Module Contract Verification ---');
++
++{
++  const sentimentModule = await import('../recommender/sentiment.js');
++  const hasExport = typeof sentimentModule.analyzeSentiment === 'function';
++  const isAlias = sentimentModule.analyzeSentiment === sentimentModule.analyzeReviewSentiment;
++
++  // Verify evaluation on rating 4 with negative text
++  const calibratedNegative = sentimentModule.analyzeSentiment(
++    'Not good, not exciting, and definitely not recommended.',
++    4
++  );
++  const pass = hasExport && isAlias && calibratedNegative.polarity < 0 && calibratedNegative.label === 'negative';
++  recordTest(
++    'Review Route Contract: analyzeSentiment is exported as alias and produces calibrated score',
++    pass,
++    `hasExport: ${hasExport}, isAlias: ${isAlias}, polarity: ${calibratedNegative?.polarity}, label: ${calibratedNegative?.label}`
++  );
++}
++
+ // ===========================================================================
+ // SUMMARY & VERDICT
+ // ===========================================================================

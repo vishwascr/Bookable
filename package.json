@@ -1,0 +1,9 @@
+{
+  "name": "bookable",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Bookable — iOS-Styled On-Device Goodreads Alternative",
+  "scripts": {
+    "test": "node tests/run-all.js"
+  }
+}
