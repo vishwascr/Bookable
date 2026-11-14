@@ -1,11 +1,12 @@
 # 📚 Bookable — Documentation
 
-Bookable is a **MERN** (MongoDB · Express · React · Node) web app that recommends books from
-`Books.csv` (≈271k books, Book-Crossing dataset) using **five selectable algorithms**, and shows
-*how* each algorithm arrived at its results.
+Bookable is an **on-device Goodreads alternative** built on **MERN** (MongoDB · Express · React · Node) that recommends books from `Books.csv` (≈271k books, Book-Crossing dataset) using **selectable local algorithms**, **3-book seed + review sentiment recommendations** (zero title-similarity weighting), and an **iOS-inspired 20px rounded UI** with **Dev Mode** diagnostics.
 
 | Doc | Contents |
 |---|---|
+| [../GAP_ANALYSIS.md](../GAP_ANALYSIS.md) | Goodreads feature-parity audit and implemented overhaul capabilities |
+| [../TEST_INFRA.md](../TEST_INFRA.md) | E2E & adversarial test infrastructure |
+| [../TEST_READY.md](../TEST_READY.md) | Test runner setup and verification summary |
 | [01-requirements.md](01-requirements.md) | Goals, decisions agreed during the design interview, scope |
 | [02-phases.md](02-phases.md) | The build phases, deliverables and status |
 | [03-architecture.md](03-architecture.md) | System design, data flow, folder layout |
