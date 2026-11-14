@@ -18,6 +18,8 @@ export default function ReviewModal({
   onSubmitSuccess = null,
   onDeleteSuccess = null,
   onReviewSaved = null,
+  onSentimentAnalyzed = null,
+  devMode = false,
 }) {
   const [rating, setRating] = useState(existingReview?.rating || 0);
   const [hoverRating, setHoverRating] = useState(0);
@@ -55,6 +57,16 @@ export default function ReviewModal({
 
     try {
       const res = await api.submitReview(book.isbn, { rating, text });
+      if (res?.review?.sentiment && onSentimentAnalyzed) {
+        onSentimentAnalyzed({
+          ...res.review.sentiment,
+          bookTitle: book.title,
+          author: book.author,
+          rating,
+          text,
+          timestamp: new Date().toISOString(),
+        });
+      }
       if (onSubmitSuccess) onSubmitSuccess(res);
       if (onReviewSaved) onReviewSaved(res);
       onClose();

@@ -48,6 +48,24 @@ export const api = {
   recommend: (isbn, algo, weights, limit = 12) =>
     j(`/api/recommend/${isbn}?${weightParams(new URLSearchParams({ algo, limit }), weights)}`),
 
+  // Recommendation Engine Endpoints (M2, M4)
+  recommendThree: (seeds, weights, limit = 12) =>
+    j('/api/recommend/three', {
+      method: 'POST',
+      body: { seeds, weights, limit },
+    }),
+  recommendSentimentAdapted: (body) =>
+    j('/api/recommend/sentiment-adapted', {
+      method: 'POST',
+      body,
+    }),
+  testSentimentAdapted: (body) =>
+    j('/api/recommend/sentiment-adapted', {
+      method: 'POST',
+      body,
+    }),
+  getDevDiagnostics: () => j('/api/dev/diagnostics'),
+
   // User accounts & shelves
   signup: (body) => j('/api/auth/signup', { method: 'POST', body }),
   login: (body) => j('/api/auth/login', { method: 'POST', body }),

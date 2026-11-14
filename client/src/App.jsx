@@ -16,6 +16,8 @@ import SettingsPage from './components/SettingsPage.jsx';
 import ReviewModal from './components/ReviewModal.jsx';
 import BookDetailModal from './components/BookDetailModal.jsx';
 import Mascot from './components/Mascot.jsx';
+import AlgorithmCustomizer, { DEFAULT_ALGO_WEIGHTS } from './components/AlgorithmCustomizer.jsx';
+import DevDiagnosticsHUD from './components/DevDiagnosticsHUD.jsx';
 
 const SAMPLE_SEARCHES = [
   'Hobbit',
@@ -46,6 +48,65 @@ export default function App() {
   const [reviewModalBook, setReviewModalBook] = useState(null);
   const [existingReviewForModal, setExistingReviewForModal] = useState(null);
   const [detailModalBook, setDetailModalBook] = useState(null);
+
+  // Milestone 4: Dev Mode & Algorithm Customizer State
+  const DEV_MODE_KEY = 'bookable_dev_mode';
+  const ALGO_WEIGHTS_KEY = 'bookable_algo_weights';
+
+  const [devMode, setDevMode] = useState(() => {
+    try {
+      return localStorage.getItem(DEV_MODE_KEY) === 'true';
+    } catch {
+      return false;
+    }
+  });
+
+  const [algoWeights, setAlgoWeights] = useState(() => {
+    try {
+      const saved = localStorage.getItem(ALGO_WEIGHTS_KEY);
+      return saved ? JSON.parse(saved) : DEFAULT_ALGO_WEIGHTS;
+    } catch {
+      return DEFAULT_ALGO_WEIGHTS;
+    }
+  });
+
+  const [customizerOpen, setCustomizerOpen] = useState(false);
+  const [hudCollapsed, setHudCollapsed] = useState(false);
+  const [serverDiagnostics, setServerDiagnostics] = useState(null);
+  const [latestReviewSentiment, setLatestReviewSentiment] = useState(null);
+
+  const toggleDevMode = useCallback(() => {
+    setDevMode((prev) => {
+      const next = !prev;
+      try {
+        localStorage.setItem(DEV_MODE_KEY, String(next));
+      } catch {}
+      return next;
+    });
+  }, []);
+
+  const handleAlgoWeightsChange = useCallback((newWeights) => {
+    setAlgoWeights(newWeights);
+    try {
+      localStorage.setItem(ALGO_WEIGHTS_KEY, JSON.stringify(newWeights));
+    } catch {}
+  }, []);
+
+  const refreshServerDiagnostics = useCallback(async () => {
+    try {
+      const diag = await api.getDevDiagnostics();
+      setServerDiagnostics(diag);
+      return diag;
+    } catch (err) {
+      console.warn('Diagnostics fetch failed:', err.message);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (devMode) {
+      refreshServerDiagnostics();
+    }
+  }, [devMode, refreshServerDiagnostics]);
 
   // Computed shelf mapping for fast O(1) status lookup across book cards
   const shelfMap = useMemo(() => {
@@ -158,15 +219,22 @@ export default function App() {
   };
 
   const handleShelfChange = useCallback(
-    async (isbnOrBook, newStatus) => {
+    async (isbnOrBook, newStatus, maybeBook = null) => {
       if (!getToken() || !me) {
         setView('login');
         return;
       }
 
-      const isbn = typeof isbnOrBook === 'object' && isbnOrBook !== null ? isbnOrBook.isbn : isbnOrBook;
-      const cleanIsbn = String(isbn || '').trim();
+      const bookObj = typeof isbnOrBook === 'object' && isbnOrBook !== null ? isbnOrBook : maybeBook;
+      const cleanIsbn = String(bookObj?.isbn || isbnOrBook || '').trim();
       if (!cleanIsbn) return;
+
+      // Auto-open ReviewModal when marking as 'read'
+      if (newStatus === 'read') {
+        const bookForModal = bookObj || { isbn: cleanIsbn, title: `Book (${cleanIsbn})` };
+        setReviewModalBook(bookForModal);
+        setExistingReviewForModal(null);
+      }
 
       const prevMe = me;
 
@@ -276,6 +344,40 @@ export default function App() {
                 : 'Building index…'}
             </div>
           )}
+
+          {/* Milestone 4: Top Action Controls Bar */}
+          <div className="top-controls-group">
+            <button
+              type="button"
+              className={`btn-algo-toggle ${customizerOpen ? 'active' : ''}`}
+              onClick={() => setCustomizerOpen((prev) => !prev)}
+              aria-expanded={customizerOpen}
+              title="Customize recommendation heuristic parameters"
+            >
+              <span>⚙️</span>
+              <span>Customize Algorithm</span>
+              <span className="toggle-caret">{customizerOpen ? '▴' : '▾'}</span>
+            </button>
+
+            <button
+              type="button"
+              className={`dev-mode-toggle-btn ${devMode ? 'active' : ''}`}
+              onClick={toggleDevMode}
+              aria-pressed={devMode}
+              title={
+                devMode
+                  ? 'Dev Mode is ON — Click to switch to standard clean Goodreads browsing'
+                  : 'Dev Mode is OFF — Click to view diagnostic HUD & internal telemetry'
+              }
+            >
+              <span className="dev-toggle-icon">🛠️</span>
+              <span className="dev-toggle-text">Dev Mode:</span>
+              <span className={`dev-toggle-badge ${devMode ? 'on' : 'off'}`}>
+                {devMode ? 'ON' : 'OFF'}
+              </span>
+            </button>
+          </div>
+
           {me ? (
             <nav className="user-nav" aria-label="User account navigation">
               {me.user.onboarded && (
@@ -324,6 +426,29 @@ export default function App() {
           )}
         </div>
       </header>
+
+      {/* Milestone 4: Collapsible Algorithm Customizer Drawer */}
+      <AlgorithmCustomizer
+        isOpen={customizerOpen}
+        weights={algoWeights}
+        onChange={handleAlgoWeightsChange}
+        onToggle={() => setCustomizerOpen((prev) => !prev)}
+        onClose={() => setCustomizerOpen(false)}
+      />
+
+      {/* Milestone 4: Dev Mode Diagnostics HUD */}
+      {devMode && (
+        <DevDiagnosticsHUD
+          isOpen={!hudCollapsed}
+          onToggleCollapse={() => setHudCollapsed((c) => !c)}
+          onClose={() => setDevMode(false)}
+          currentWeights={algoWeights}
+          latestRecRun={data?.runs?.[0] || null}
+          latestReviewSentiment={latestReviewSentiment}
+          serverDiagnostics={serverDiagnostics}
+          onRefreshDiagnostics={refreshServerDiagnostics}
+        />
+      )}
 
       {/* Global search bar visible on browse / content pages */}
       {!['login', 'signup', 'logout', 'onboarding'].includes(view) && (
@@ -431,6 +556,8 @@ export default function App() {
           algos={algos}
           weights={weights}
           setWeights={setWeights}
+          algoWeights={algoWeights}
+          devMode={devMode}
           onEditFavorites={() => setView('onboarding')}
           onExplore={explore}
           onToggleWant={handleShelfChange}
@@ -527,6 +654,7 @@ export default function App() {
                       shelfMap={shelfMap}
                       onShelfChange={handleShelfChange}
                       onRequireAuth={() => setView('login')}
+                      devMode={devMode}
                     />
                   ))}
                 </div>
@@ -546,6 +674,8 @@ export default function App() {
             setExistingReviewForModal(null);
           }}
           onReviewSaved={handleReviewSaved}
+          onSentimentAnalyzed={setLatestReviewSentiment}
+          devMode={devMode}
         />
       )}
 
@@ -559,6 +689,7 @@ export default function App() {
           onOpenReview={handleOpenReview}
           onStatusChange={handleShelfChange}
           onShelfChange={handleShelfChange}
+          devMode={devMode}
         />
       )}
 

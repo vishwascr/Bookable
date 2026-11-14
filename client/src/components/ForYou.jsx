@@ -5,6 +5,7 @@ import AlgorithmPicker from './AlgorithmPicker.jsx';
 import WeightSliders, { FEATURE_LABELS } from './WeightSliders.jsx';
 import HowItWorks from './HowItWorks.jsx';
 import ReadingStatusButton from './ReadingStatusButton.jsx';
+import ThreeSeedSelector from './ThreeSeedSelector.jsx';
 
 function Bar({ value, cls = '' }) {
   return <div className={`bar ${cls}`}><div style={{ width: `${Math.max(0, Math.min(1, value)) * 100}%` }} /></div>;
@@ -16,6 +17,8 @@ export default function ForYou({
   algos,
   weights,
   setWeights,
+  algoWeights,
+  devMode = false,
   onEditFavorites,
   onExplore,
   onToggleWant,
@@ -70,6 +73,17 @@ export default function ForYou({
         </div>
       </div>
 
+      {/* Milestone 4: 3-Seed Recommendation Engine with Custom Algorithm Weights */}
+      <ThreeSeedSelector
+        weights={algoWeights}
+        me={me}
+        shelfMap={shelfMap}
+        onShelfChange={onShelfChange || onToggleWant}
+        onRequireAuth={onRequireAuth}
+        onSelectBook={onSelectBook || onExplore}
+        devMode={devMode}
+      />
+
       <AlgorithmPicker algos={algos} value={algo} onChange={setAlgo} />
       {error && <div className="error">{error}</div>}
 
@@ -96,7 +110,11 @@ export default function ForYou({
                 <section key={run.algorithm} className="run">
                   <div className="run-head">
                     <h2>{run.name}</h2>
-                    <span className="m mono">{run.meta.candidatesConsidered} candidates · {run.meta.ms} ms</span>
+                    {devMode && (
+                      <span className="m mono dev-meta-pill">
+                        🔍 {run.meta.candidatesConsidered} candidates · ⏱️ {run.meta.ms} ms · 🛡️ Title: EXCLUDED
+                      </span>
+                    )}
                   </div>
                   {run.results.length === 0 && <div className="m empty-run">No recommendations from this algorithm.</div>}
                   <ol className={`results ${compare ? 'compact' : ''}`}>
@@ -119,23 +137,33 @@ export default function ForYou({
                             <div className="because">
                               Because you liked {liked.map((b) => <i key={b.isbn}>{b.title.split(/[:(]/)[0].trim()}</i>).reduce((a, el, k) => (k ? [...a, ', ', el] : [el]), [])}
                             </div>
-                            <div className="score-row"><Bar value={r.score} cls="main" /> <span className="mono">{r.score.toFixed(3)}</span></div>
-                            {!compare && (
-                              <div className="features">
-                                {Object.entries(r.contributions).map(([isbn, v]) => (
-                                  <div key={isbn} className="feat contrib">
-                                    <span title={favByIsbn[isbn]?.title}>{(favByIsbn[isbn]?.title || isbn).slice(0, 14)}</span>
-                                    <Bar value={v} /><span className="mono">{v.toFixed(2)}</span>
+                            {devMode ? (
+                              <div className="dev-card-telemetry">
+                                <div className="dev-diagnostic-badge">
+                                  <span className="badge-score">Score: {r.score.toFixed(3)}</span>
+                                  <span className="badge-title-zero">Title: EXCLUDED (0.00)</span>
+                                </div>
+                                <div className="score-row">
+                                  <Bar value={r.score} cls="main" /> <span className="mono">{r.score.toFixed(3)}</span>
+                                </div>
+                                {!compare && (
+                                  <div className="features">
+                                    {Object.entries(r.contributions).map(([isbn, v]) => (
+                                      <div key={isbn} className="feat contrib">
+                                        <span title={favByIsbn[isbn]?.title}>{(favByIsbn[isbn]?.title || isbn).slice(0, 14)}</span>
+                                        <Bar value={v} /><span className="mono">{v.toFixed(2)}</span>
+                                      </div>
+                                    ))}
+                                    <details>
+                                      <summary className="m">Feature breakdown vs. strongest favourite</summary>
+                                      {Object.entries(r.features).map(([k, v]) => (
+                                        <div key={k} className="feat"><span>{FEATURE_LABELS[k]}</span><Bar value={v} /><span className="mono">{v.toFixed(2)}</span></div>
+                                      ))}
+                                    </details>
                                   </div>
-                                ))}
-                                <details>
-                                  <summary className="m">Feature breakdown vs. strongest favourite</summary>
-                                  {Object.entries(r.features).map(([k, v]) => (
-                                    <div key={k} className="feat"><span>{FEATURE_LABELS[k]}</span><Bar value={v} /><span className="mono">{v.toFixed(2)}</span></div>
-                                  ))}
-                                </details>
+                                )}
                               </div>
-                            )}
+                            ) : null}
                             <div className="foryou-item-actions" onClick={(e) => e.stopPropagation()}>
                               <ReadingStatusButton
                                 book={r.book}

@@ -12,6 +12,7 @@ export default function BookDetailModal({
   onOpenReview = null,
   onStatusChange = null,
   onShelfChange = null,
+  devMode = false,
 }) {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -214,18 +215,29 @@ export default function BookDetailModal({
                         day: 'numeric',
                       })}
                     </span>
-                    {userReview.sentiment?.label && (
+                    {devMode && userReview.sentiment?.label && (
                       <span className={`sentiment-badge ${userReview.sentiment.label}`}>
                         {userReview.sentiment.label}
                       </span>
                     )}
                   </div>
+                  {devMode && userReview.sentiment && (
+                    <div className="dev-review-diagnostic-badge">
+                      <span className="dev-diag-polarity">
+                        Polarity: {(userReview.sentiment.polarity ?? userReview.sentiment.score ?? 0) > 0 ? '+' : ''}
+                        {Number(userReview.sentiment.polarity ?? userReview.sentiment.score ?? 0).toFixed(3)}
+                      </span>
+                      <span className="dev-diag-class">
+                        Classification: {userReview.sentiment.classification || userReview.sentiment.label}
+                      </span>
+                    </div>
+                  )}
                   {userReview.text ? (
                     <p className="review-body-text">{userReview.text}</p>
                   ) : (
                     <p className="review-empty-text"><i>(Rated without written text)</i></p>
                   )}
-                  {userReview.sentiment?.keywords?.length > 0 && (
+                  {devMode && userReview.sentiment?.keywords?.length > 0 && (
                     <div className="sentiment-keywords">
                       {userReview.sentiment.keywords.map((kw) => (
                         <span key={kw} className="kw-pill">#{kw}</span>
@@ -275,7 +287,7 @@ export default function BookDetailModal({
                             day: 'numeric',
                           })}
                         </span>
-                        {rev.sentiment?.label && (
+                        {devMode && rev.sentiment?.label && (
                           <span className={`sentiment-badge ${rev.sentiment.label}`}>
                             {rev.sentiment.label}
                           </span>
@@ -283,8 +295,20 @@ export default function BookDetailModal({
                       </div>
                     </div>
 
+                    {devMode && rev.sentiment && (
+                      <div className="dev-review-diagnostic-badge">
+                        <span className="dev-diag-polarity">
+                          Polarity: {(rev.sentiment.polarity ?? rev.sentiment.score ?? 0) > 0 ? '+' : ''}
+                          {Number(rev.sentiment.polarity ?? rev.sentiment.score ?? 0).toFixed(3)}
+                        </span>
+                        <span className="dev-diag-class">
+                          Classification: {rev.sentiment.classification || rev.sentiment.label}
+                        </span>
+                      </div>
+                    )}
+
                     {rev.text && <p className="review-text-content">{rev.text}</p>}
-                    {rev.sentiment?.keywords?.length > 0 && (
+                    {devMode && rev.sentiment?.keywords?.length > 0 && (
                       <div className="review-keywords">
                         {rev.sentiment.keywords.map((kw) => (
                           <span key={kw} className="kw-pill sm">#{kw}</span>
