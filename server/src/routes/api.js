@@ -78,7 +78,7 @@ function parseThreeWeights(weights) {
   for (const k of allowed) {
     if (weights[k] !== undefined) {
       const val = Number(weights[k]);
-      if (isNaN(val) || val < 0) return { error: `Weight for "${k}" must be a non-negative number` };
+      if (!Number.isFinite(val) || val < 0) return { error: `Weight for "${k}" must be a non-negative number` };
       w[k] = val;
     } else {
       w[k] = DEFAULT_THREE_WEIGHTS[k];
@@ -247,23 +247,32 @@ r.get('/books/:isbn', ready, (req, res) => {
 
 function parseWeights(q) {
   const w = { ...DEFAULT_WEIGHTS };
-  for (const k of Object.keys(w)) if (q[`w_${k}`] !== undefined) w[k] = Math.max(0, Number(q[`w_${k}`]) || 0);
+  for (const k of Object.keys(w)) {
+    if (q[`w_${k}`] !== undefined) {
+      const val = Number(q[`w_${k}`]);
+      w[k] = Number.isFinite(val) ? Math.max(0, val) : 0;
+    }
+  }
   return w;
 }
 
 // GET /api/recommend/:isbn?algo=tfidf|author|publisher|year|hybrid|all&limit=12&w_title=..
-r.get('/recommend/:isbn', ready, (req, res) => {
-  const i = engine().byIsbn.get(req.params.isbn);
-  if (i === undefined) return res.status(404).json({ error: 'Book not found' });
-  const algo = String(req.query.algo || 'hybrid');
-  const limit = Math.min(parseInt(req.query.limit, 10) || 12, 50);
-  const weights = parseWeights(req.query);
-  const seed = { book: publicBook(engine().books[i]), terms: termsOf(i) };
-  if (algo === 'all') {
-    return res.json({ seed, runs: Object.keys(ALGORITHMS).map((k) => recommend(k, i, { limit, weights })) });
+r.get('/recommend/:isbn', ready, (req, res, next) => {
+  try {
+    const i = engine().byIsbn.get(req.params.isbn);
+    if (i === undefined) return res.status(404).json({ error: 'Book not found' });
+    const algo = String(req.query.algo || 'hybrid');
+    const limit = Math.min(parseInt(req.query.limit, 10) || 12, 50);
+    const weights = parseWeights(req.query);
+    const seed = { book: publicBook(engine().books[i]), terms: termsOf(i) };
+    if (algo === 'all') {
+      return res.json({ seed, runs: Object.keys(ALGORITHMS).map((k) => recommend(k, i, { limit, weights })) });
+    }
+    if (!Object.hasOwn(ALGORITHMS, algo)) return res.status(400).json({ error: `Unknown algo "${algo}"` });
+    res.json({ seed, runs: [recommend(algo, i, { limit, weights })] });
+  } catch (e) {
+    next(e);
   }
-  if (!ALGORITHMS[algo]) return res.status(400).json({ error: `Unknown algo "${algo}"` });
-  res.json({ seed, runs: [recommend(algo, i, { limit, weights })] });
 });
 
 export default r;

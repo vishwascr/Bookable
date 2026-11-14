@@ -19,6 +19,7 @@ const ALL_SUITES = [
   path.join(rootDir, 'tests/recommendation-heuristics.test.js'),
   path.join(rootDir, 'tests/sentiment-analysis.test.js'),
   path.join(rootDir, 'tests/e2e-scenarios.test.js'),
+  path.join(rootDir, 'tests/tier5-adversarial.test.js'),
 ];
 
 // Parse command line arguments
@@ -63,6 +64,7 @@ async function main() {
     T2: { total: 0, pass: 0, fail: 0 },
     T3: { total: 0, pass: 0, fail: 0 },
     T4: { total: 0, pass: 0, fail: 0 },
+    T5: { total: 0, pass: 0, fail: 0 },
     other: { total: 0, pass: 0, fail: 0 },
   };
 
@@ -80,10 +82,10 @@ async function main() {
 
   testStream.on('test:pass', (t) => {
     // Only count leaf tests, not describe blocks
-    if (t.nesting === 0 && !t.name.startsWith('T1-') && !t.name.startsWith('T2-') && !t.name.startsWith('T3-') && !t.name.startsWith('T4-')) {
+    if (t.nesting === 0 && !t.name.startsWith('T1-') && !t.name.startsWith('T2-') && !t.name.startsWith('T3-') && !t.name.startsWith('T4-') && !t.name.startsWith('T5-')) {
       return;
     }
-    const match = t.name.match(/^(T[1-4])-/);
+    const match = t.name.match(/^(T[1-5])-/);
     const tier = match ? match[1] : 'other';
     if (stats[tier]) {
       stats[tier].total++;
@@ -93,7 +95,7 @@ async function main() {
   });
 
   testStream.on('test:fail', (t) => {
-    const match = t.name.match(/^(T[1-4])-/);
+    const match = t.name.match(/^(T[1-5])-/);
     const tier = match ? match[1] : 'other';
     if (stats[tier]) {
       stats[tier].total++;
@@ -116,6 +118,9 @@ async function main() {
       console.log(`  Tier 2 (Boundary & Corner Cases)    : ${stats.T2.pass} pass / ${stats.T2.fail} fail (Target: 52)`);
       console.log(`  Tier 3 (Cross-Feature Combinations) : ${stats.T3.pass} pass / ${stats.T3.fail} fail (Target: 12)`);
       console.log(`  Tier 4 (Real-World User Scenarios)  : ${stats.T4.pass} pass / ${stats.T4.fail} fail (Target: 6)`);
+      if (stats.T5.total > 0) {
+        console.log(`  Tier 5 (Adversarial Coverage)       : ${stats.T5.pass} pass / ${stats.T5.fail} fail (Target: 66)`);
+      }
       if (stats.other.total > 0) {
         console.log(`  Other / Suite Tests                 : ${stats.other.pass} pass / ${stats.other.fail} fail`);
       }

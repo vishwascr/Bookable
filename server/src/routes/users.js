@@ -59,10 +59,15 @@ r.post('/auth/signup', async (req, res, next) => {
     if (!/^[a-z0-9_.-]{3,30}$/.test(username))
       return res.status(400).json({ error: 'Username must be 3–30 characters: letters, numbers, _ . -' });
     if (password.length < 6) return res.status(400).json({ error: 'Password must be at least 6 characters' });
+    if (displayName.length > 60) return res.status(400).json({ error: 'Display name cannot exceed 60 characters' });
     if (await User.exists({ username })) return res.status(409).json({ error: 'That username is taken' });
     const user = await User.create({ username, displayName, passwordHash: await bcrypt.hash(password, 10) });
     res.status(201).json({ token: signToken(user), user: user.toPublic() });
-  } catch (e) { next(e); }
+  } catch (e) {
+    if (e.code === 11000) return res.status(409).json({ error: 'That username is taken' });
+    if (e.name === 'ValidationError') return res.status(400).json({ error: e.message });
+    next(e);
+  }
 });
 
 r.post('/auth/login', async (req, res, next) => {
@@ -142,7 +147,8 @@ r.get('/me/shelves', requireAuth, loadUser, async (req, res, next) => {
 // PUT /api/me/favorites: Replace favourites (onboarding + editing). 3–5 valid ISBNs.
 r.put('/me/favorites', requireAuth, loadUser, async (req, res, next) => {
   try {
-    const isbns = [...new Set((req.body?.isbns || []).map(String))];
+    if (!Array.isArray(req.body?.isbns)) return res.status(400).json({ error: 'isbns must be an array' });
+    const isbns = [...new Set(req.body.isbns.map(String))];
     if (isbns.length < 3 || isbns.length > 5) return res.status(400).json({ error: 'Pick between 3 and 5 books' });
     const unknown = isbns.filter((i) => !engine().byIsbn.has(i));
     if (unknown.length) return res.status(400).json({ error: `Unknown ISBN(s): ${unknown.join(', ')}` });
@@ -248,24 +254,28 @@ r.post('/me/reset-books', requireAuth, loadUser, async (req, res, next) => {
 
 // Personalised recommendations from the user's favourites.
 // GET /api/me/recommend?algo=hybrid|tfidf|author|publisher|year|all&limit=&w_*=
-r.get('/me/recommend', requireAuth, loadUser, (req, res) => {
-  if (!engine().ready) return res.status(503).json({ error: 'Index is still building, try again in a few seconds.' });
-  const e = engine();
-  const seeds = req.user.favorites.map((i) => e.byIsbn.get(i)).filter((i) => i !== undefined);
-  if (seeds.length < 3) return res.status(400).json({ error: 'Pick at least 3 favourite books first' });
-  const exclude = req.user.wantToRead.map((i) => e.byIsbn.get(i)).filter((i) => i !== undefined);
+r.get('/me/recommend', requireAuth, loadUser, (req, res, next) => {
+  try {
+    if (!engine().ready) return res.status(503).json({ error: 'Index is still building, try again in a few seconds.' });
+    const e = engine();
+    const seeds = req.user.favorites.map((i) => e.byIsbn.get(i)).filter((i) => i !== undefined);
+    if (seeds.length < 3) return res.status(400).json({ error: 'Pick at least 3 favourite books first' });
+    const exclude = req.user.wantToRead.map((i) => e.byIsbn.get(i)).filter((i) => i !== undefined);
 
-  const algo = String(req.query.algo || 'hybrid');
-  const limit = Math.min(parseInt(req.query.limit, 10) || 12, 50);
-  const weights = { ...DEFAULT_WEIGHTS };
-  for (const k of Object.keys(weights)) if (req.query[`w_${k}`] !== undefined) weights[k] = Math.max(0, Number(req.query[`w_${k}`]) || 0);
+    const algo = String(req.query.algo || 'hybrid');
+    const limit = Math.min(parseInt(req.query.limit, 10) || 12, 50);
+    const weights = { ...DEFAULT_WEIGHTS };
+    for (const k of Object.keys(weights)) if (req.query[`w_${k}`] !== undefined) weights[k] = Math.max(0, Number(req.query[`w_${k}`]) || 0);
 
-  const keys = algo === 'all' ? Object.keys(ALGORITHMS) : [algo];
-  if (!keys.every((k) => ALGORITHMS[k])) return res.status(400).json({ error: `Unknown algo "${algo}"` });
-  res.json({
-    favorites: seeds.map((i) => publicBook(e.books[i])),
-    runs: keys.map((k) => recommendProfile(k, seeds, { limit, weights, exclude })),
-  });
+    const keys = algo === 'all' ? Object.keys(ALGORITHMS) : [algo];
+    if (!keys.every((k) => Object.hasOwn(ALGORITHMS, k))) return res.status(400).json({ error: `Unknown algo "${algo}"` });
+    res.json({
+      favorites: seeds.map((i) => publicBook(e.books[i])),
+      runs: keys.map((k) => recommendProfile(k, seeds, { limit, weights, exclude })),
+    });
+  } catch (e) {
+    next(e);
+  }
 });
 
 // Onboarding grid
