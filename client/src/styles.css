@@ -104,6 +104,9 @@
 .algo-customizer-drawer,
 .algo-customizer-panel,
 .dev-hud {
+  position: relative;
+  z-index: 10;
+  overflow: hidden;
   border-radius: var(--ios-radius) !important; /* Exactly 20px */
 }
 
@@ -1422,7 +1425,7 @@ details summary {
 
 .shelf-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
   gap: 16px;
 }
 
@@ -2609,6 +2612,8 @@ details summary {
   padding: 16px;
   display: flex;
   gap: 16px;
+  min-width: 0;
+  overflow: hidden;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
   transition: transform 0.15s ease, box-shadow 0.15s ease;
   cursor: pointer;
@@ -2638,6 +2643,7 @@ details summary {
 
 .card-content {
   flex: 1;
+  min-width: 0;
   display: flex;
   flex-direction: column;
 }
@@ -3871,6 +3877,9 @@ details summary {
    Milestone 4: Dev Mode Diagnostics HUD Component
    ========================================================================== */
 .dev-hud {
+  position: relative;
+  z-index: 10;
+  overflow: hidden;
   border-radius: var(--ios-radius) !important;
   background: rgba(255, 255, 255, 0.96);
   backdrop-filter: var(--ios-glass-blur);
